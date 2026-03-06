@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema de Pinturas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         :root {
             --primary: #4F46E5;
@@ -33,20 +35,20 @@
         
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-        /* Botões */
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-outline { background: transparent; color: var(--primary); border: 2px dashed var(--primary); }
-        .btn-success { background: var(--success); color: white; }
         .btn-header { width: auto; padding: 8px 12px; font-size: 0.9rem; margin-top: 0; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
-        .btn-share { background: #25D366; color: white; margin-top: 10px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; } /* Cor do WhatsApp */
+        
+        /* Botões de Ação no Card */
+        .acoes-card { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-share-text { background: #25D366; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; }
+        .btn-share-pdf { background: #EF4444; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; }
 
-        /* Lista e FAB */
         .header-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--primary); color: white; font-size: 2rem; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4); display: flex; align-items: center; justify-content: center; z-index: 100; margin-top: 0; padding: 0; }
         .orcamento-salvo-card { border-left: 4px solid var(--primary); padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         
-        /* Sistema Dinâmico de Serviços */
         .servico-item { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: #fafafa; }
         .btn-remover { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); font-size: 1.5rem; width: auto; padding: 0; margin: 0; }
         .tipo-cobranca { margin-bottom: 15px; font-weight: bold; color: var(--primary); }
@@ -56,6 +58,21 @@
         .nav-item.active { color: var(--primary); font-weight: bold; }
         
         .total-orcamento { font-size: 1.5rem; text-align: right; color: var(--primary); font-weight: bold; margin-top: 10px; }
+
+        /* Estilos específicos para o layout do PDF (invisível na tela principal) */
+        #pdf-container { position: absolute; left: -9999px; top: 0; }
+        .pdf-layout { width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif; }
+        .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1F2937; padding-bottom: 20px; margin-bottom: 20px; }
+        .pdf-logo-box { width: 150px; height: 80px; background: #F3F4F6; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9CA3AF; text-align: center; }
+        .pdf-company-info { text-align: right; }
+        .pdf-company-info h1 { margin: 0; color: #1F2937; font-size: 1.8rem; }
+        .pdf-company-info p { margin: 5px 0 0 0; color: #4B5563; font-size: 0.9rem; }
+        .pdf-client-box { background: #F9FAFB; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #E5E7EB; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .pdf-table th { background: #1F2937; color: white; padding: 12px; text-align: left; font-size: 0.9rem; }
+        .pdf-table td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.9rem; }
+        .pdf-total-box { text-align: right; padding: 20px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 1.2rem; }
+        .pdf-footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px; }
     </style>
 </head>
 <body>
@@ -70,14 +87,13 @@
                 <button class="btn-header" onclick="carregarListaOrcamentos()">🔄 Atualizar</button>
             </div>
             
-            <div id="container-lista">
-                </div>
+            <div id="container-lista"></div>
 
             <button class="fab" onclick="abrirNovoOrcamento()">+</button>
         </div>
 
         <div id="tela-novo-orcamento" style="display: none;">
-            <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaLista()">⬅ Voltar para Lista</button>
+            <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaLista()">⬅ Voltar</button>
             
             <div class="card">
                 <label>Cliente / Obra</label>
@@ -100,7 +116,7 @@
     </main>
 
     <main id="view-financeiro" class="view">
-        <div class="card"><p>Em desenvolvimento...</p></div>
+        <div class="card"><p>Módulo Financeiro em desenvolvimento...</p></div>
     </main>
 
     <nav class="bottom-nav">
@@ -114,6 +130,47 @@
             <span class="nav-icon">👥</span> Clientes
         </button>
     </nav>
+
+    <div id="pdf-container">
+        <div id="pdf-template" class="pdf-layout">
+            <div class="pdf-header">
+                <div class="pdf-logo-box">Sua Logo<br>Aqui</div>
+                <div class="pdf-company-info">
+                    <h1>ORÇAMENTO</h1>
+                    <p>Pinturas & Reformas Profissionais</p>
+                    <p>WhatsApp: (00) 00000-0000</p>
+                </div>
+            </div>
+            
+            <div class="pdf-client-box">
+                <strong>Cliente / Obra:</strong> <span id="pdf-cliente-nome"></span><br>
+                <strong>Data:</strong> <span id="pdf-data"></span><br>
+                <strong>Orçamento Nº:</strong> <span id="pdf-id"></span>
+            </div>
+
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th>Descrição do Serviço</th>
+                        <th>Medida / Qtd</th>
+                        <th>V. Unitário</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-tabela-corpo">
+                    </tbody>
+            </table>
+
+            <div class="pdf-total-box">
+                <strong>Valor Total: <span id="pdf-total-valor"></span></strong>
+            </div>
+
+            <div class="pdf-footer">
+                <p>Orçamento válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo do projeto.</p>
+                <p>Agradecemos a preferência!</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         // --- NAVEGAÇÃO ---
@@ -146,44 +203,25 @@
             
             item.innerHTML = `
                 <button class="btn-remover" onclick="removerServico(this)">&times;</button>
-                
                 <select class="tipo-cobranca" onchange="alternarModoCalculo(this)">
                     <option value="unidade">Cobrar por Fixo / Unidade</option>
                     <option value="m2">Cobrar por Metro Quadrado (m²)</option>
                 </select>
-
                 <label>Descrição</label>
                 <input type="text" class="desc-servico" placeholder="Ex: Pintura Externa">
                 
                 <div class="bloco-unidade row-2">
-                    <div>
-                        <label>Quantidade</label>
-                        <input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()">
-                    </div>
-                    <div>
-                        <label>Valor Unit. (R$)</label>
-                        <input type="number" class="valor-unit" placeholder="0.00" oninput="calcularTotal()">
-                    </div>
+                    <div><label>Quantidade</label><input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()"></div>
+                    <div><label>Valor Unit. (R$)</label><input type="number" class="valor-unit" placeholder="0.00" oninput="calcularTotal()"></div>
                 </div>
 
                 <div class="bloco-m2" style="display: none;">
                     <div class="row-2">
-                        <div>
-                            <label>Largura (m)</label>
-                            <input type="number" class="largura-m2" placeholder="0.0" oninput="calcularTotal()">
-                        </div>
-                        <div>
-                            <label>Altura (m)</label>
-                            <input type="number" class="altura-m2" placeholder="0.0" oninput="calcularTotal()">
-                        </div>
+                        <div><label>Largura (m)</label><input type="number" class="largura-m2" placeholder="0.0" oninput="calcularTotal()"></div>
+                        <div><label>Altura (m)</label><input type="number" class="altura-m2" placeholder="0.0" oninput="calcularTotal()"></div>
                     </div>
-                    <div>
-                        <label>Valor do m² (R$)</label>
-                        <input type="number" class="valor-m2" placeholder="0.00" oninput="calcularTotal()">
-                    </div>
-                    <div style="text-align: right; font-size: 0.85rem; color: #6B7280; margin-top: 5px;">
-                        Área: <span class="area-display">0.00</span> m²
-                    </div>
+                    <div><label>Valor do m² (R$)</label><input type="number" class="valor-m2" placeholder="0.00" oninput="calcularTotal()"></div>
+                    <div style="text-align: right; font-size: 0.85rem; color: #6B7280; margin-top: 5px;">Área: <span class="area-display">0.00</span> m²</div>
                 </div>
             `;
             lista.appendChild(item);
@@ -195,65 +233,75 @@
             const blocoM2 = servicoItem.querySelector('.bloco-m2');
 
             if (selectElem.value === 'unidade') {
-                blocoUnidade.style.display = 'grid';
-                blocoM2.style.display = 'none';
+                blocoUnidade.style.display = 'grid'; blocoM2.style.display = 'none';
             } else {
-                blocoUnidade.style.display = 'none';
-                blocoM2.style.display = 'block';
+                blocoUnidade.style.display = 'none'; blocoM2.style.display = 'block';
             }
             calcularTotal();
         }
 
-        function removerServico(botao) {
-            botao.closest('.servico-item').remove();
-            calcularTotal();
-        }
+        function removerServico(botao) { botao.closest('.servico-item').remove(); calcularTotal(); }
 
         function calcularTotal() {
             let totalGeral = 0;
-            const itens = document.querySelectorAll('.servico-item');
-            
-            itens.forEach(item => {
+            document.querySelectorAll('.servico-item').forEach(item => {
                 const tipo = item.querySelector('.tipo-cobranca').value;
-                let subtotal = 0;
-
                 if (tipo === 'unidade') {
                     const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
                     const valor = parseFloat(item.querySelector('.valor-unit').value) || 0;
-                    subtotal = qtd * valor;
+                    totalGeral += (qtd * valor);
                 } else {
-                    const largura = parseFloat(item.querySelector('.largura-m2').value) || 0;
-                    const altura = parseFloat(item.querySelector('.altura-m2').value) || 0;
+                    const l = parseFloat(item.querySelector('.largura-m2').value) || 0;
+                    const a = parseFloat(item.querySelector('.altura-m2').value) || 0;
                     const valorM2 = parseFloat(item.querySelector('.valor-m2').value) || 0;
-                    
-                    const area = largura * altura;
+                    const area = l * a;
                     item.querySelector('.area-display').innerText = area.toFixed(2);
-                    subtotal = area * valorM2;
+                    totalGeral += (area * valorM2);
                 }
-                totalGeral += subtotal;
             });
-            
             document.getElementById('totalDisplay').innerText = totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             return totalGeral;
         }
 
-        // --- SALVAR E COMPARTILHAR ---
-
-        // Array provisório para simular orçamentos salvos enquanto não liga o GAS 100%
+        // --- SALVAR, COMPARTILHAR TEXTO E PDF ---
         let orcamentosSalvos = [];
+
+        function formatarMoeda(valor) {
+            return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
 
         function salvarOrcamento() {
             const cliente = document.getElementById('nomeCliente').value;
             if(!cliente) { alert("Preencha o nome do cliente."); return; }
 
-            const total = calcularTotal();
             const totalFormatado = document.getElementById('totalDisplay').innerText;
-            
-            // Monta o resumo para enviar depois
+            const itensArray = [];
             let resumoItens = "";
+
+            // Coleta os dados precisos para o PDF e para o Texto
             document.querySelectorAll('.servico-item').forEach(item => {
                 const desc = item.querySelector('.desc-servico').value || "Serviço sem nome";
-                resumoItens += `- ${desc}\n`;
+                const tipo = item.querySelector('.tipo-cobranca').value;
+                let medida = "", unitario = 0, sub = 0;
+
+                if (tipo === 'unidade') {
+                    const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
+                    unitario = parseFloat(item.querySelector('.valor-unit').value) || 0;
+                    sub = qtd * unitario;
+                    medida = `${qtd} un`;
+                } else {
+                    const l = parseFloat(item.querySelector('.largura-m2').value) || 0;
+                    const a = parseFloat(item.querySelector('.altura-m2').value) || 0;
+                    unitario = parseFloat(item.querySelector('.valor-m2').value) || 0;
+                    const area = l * a;
+                    sub = area * unitario;
+                    medida = `${area.toFixed(2)} m²`;
+                }
+                
+                if(sub > 0) {
+                    itensArray.push({ descricao: desc, medida: medida, unitario: formatarMoeda(unitario), subtotal: formatarMoeda(sub) });
+                    resumoItens += `- ${desc}\n`;
+                }
             });
 
             const novoOrcamento = {
@@ -261,19 +309,16 @@
                 cliente: cliente,
                 data: new Date().toLocaleDateString('pt-BR'),
                 total: totalFormatado,
+                itens: itensArray,
                 resumoTexto: `*Orçamento de Pintura*\n\n*Cliente:* ${cliente}\n*Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n*Serviços:*\n${resumoItens}\n*Total:* ${totalFormatado}`
             };
 
-            // Adiciona na lista local (AQUI ENTRARIA O SEU FETCH PARA O GAS)
             orcamentosSalvos.unshift(novoOrcamento);
             
-            alert("Orçamento Salvo!");
-            
-            // Limpa form e volta pra lista
+            // Limpa form e volta
             document.getElementById('nomeCliente').value = '';
             document.getElementById('lista-servicos').innerHTML = '';
             document.getElementById('totalDisplay').innerText = 'R$ 0,00';
-            
             carregarListaOrcamentos();
             voltarParaLista();
         }
@@ -281,16 +326,11 @@
         function carregarListaOrcamentos() {
             const container = document.getElementById('container-lista');
             container.innerHTML = '';
-
-            if (orcamentosSalvos.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color: #6B7280; margin-top: 30px;">Nenhum orçamento salvo ainda.</p>';
-                return;
-            }
+            if (orcamentosSalvos.length === 0) { container.innerHTML = '<p style="text-align:center; color: #6B7280;">Nenhum orçamento salvo.</p>'; return; }
 
             orcamentosSalvos.forEach(orc => {
                 const div = document.createElement('div');
                 div.className = 'orcamento-salvo-card';
-                // O botão abaixo chama a função de compartilhamento nativo!
                 div.innerHTML = `
                     <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
                         <strong style="font-size: 1.1rem;">${orc.cliente}</strong>
@@ -298,35 +338,95 @@
                     </div>
                     <div style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">${orc.total}</div>
                     
-                    <button class="btn-share" onclick="compartilharNativalmente('${encodeURIComponent(orc.resumoTexto)}')">
-                        📤 Compartilhar
-                    </button>
+                    <div class="acoes-card">
+                        <button class="btn-share-text" onclick="compartilharTexto('${encodeURIComponent(orc.resumoTexto)}')">
+                            💬 Texto
+                        </button>
+                        <button class="btn-share-pdf" onclick="gerarECompartilharPDF(${orc.id}, this)">
+                            📄 PDF
+                        </button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
         }
 
-        // A MÁGICA DO COMPARTILHAMENTO AQUI
-        async function compartilharNativalmente(textoCodificado) {
+        // Função 1: Compartilhar apenas Texto
+        async function compartilharTexto(textoCodificado) {
             const texto = decodeURIComponent(textoCodificado);
-            
-            // Verifica se o navegador do celular suporta a API de compartilhamento nativa
             if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Orçamento de Pintura',
-                        text: texto
-                    });
-                } catch (err) {
-                    console.log('Usuário cancelou o compartilhamento', err);
-                }
+                try { await navigator.share({ title: 'Orçamento', text: texto }); } catch (err) {}
             } else {
-                // Fallback: se estiver no PC ou navegador não suportar, abre o WhatsApp Web/App direto
                 window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
             }
         }
 
-        // Inicializa a lista vazia
+        // Função 2: Montar, Gerar e Compartilhar PDF
+        async function gerarECompartilharPDF(id, btnElement) {
+            // Feedback visual no botão
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = '⏳ Gerando...';
+            btnElement.disabled = true;
+
+            try {
+                const orc = orcamentosSalvos.find(o => o.id === id);
+                
+                // Preenche o template oculto com os dados
+                document.getElementById('pdf-cliente-nome').innerText = orc.cliente;
+                document.getElementById('pdf-data').innerText = orc.data;
+                document.getElementById('pdf-id').innerText = orc.id.toString().slice(-6);
+                document.getElementById('pdf-total-valor').innerText = orc.total;
+
+                const tbody = document.getElementById('pdf-tabela-corpo');
+                tbody.innerHTML = '';
+                orc.itens.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.descricao}</td>
+                            <td>${item.medida}</td>
+                            <td>${item.unitario}</td>
+                            <td><strong>${item.subtotal}</strong></td>
+                        </tr>
+                    `;
+                });
+
+                // Configurações do HTML2PDF
+                const elemento = document.getElementById('pdf-template');
+                const opt = {
+                    margin:       10,
+                    filename:     `Orcamento_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Gera o arquivo Blob do PDF em memória
+                const pdfBlob = await html2pdf().set(opt).from(elemento).output('blob');
+                const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
+
+                // Tenta usar o compartilhamento nativo com o arquivo
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Orçamento em PDF',
+                        text: `Olá! Segue o orçamento para ${orc.cliente} em PDF.`
+                    });
+                } else {
+                    // Fallback: Se o celular/navegador não suportar anexo, ele baixa o PDF
+                    alert("Seu navegador não suporta envio direto do arquivo. O PDF será baixado para você enviar manualmente.");
+                    html2pdf().set(opt).from(elemento).save();
+                }
+
+            } catch (error) {
+                console.error("Erro ao gerar PDF:", error);
+                alert("Houve um erro ao gerar o PDF.");
+            } finally {
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
+        }
+
+        // Inicializa a lista
         carregarListaOrcamentos();
 
     </script>
