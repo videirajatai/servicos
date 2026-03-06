@@ -163,12 +163,10 @@
         </div>
     </main>
 
-    <main id="view-financeiro" class="view"><div class="card"><p>Em desenvolvimento...</p></div></main>
-
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="mudarAba('orcamento', this)"><span class="nav-icon" style="font-size:1.3rem;">📝</span> Orçamentos</button>
-        <button class="nav-item" onclick="mudarAba('financeiro', this)"><span class="nav-icon" style="font-size:1.3rem;">💰</span> Financeiro</button>
         <button class="nav-item" onclick="mudarAba('cliente', this)"><span class="nav-icon" style="font-size:1.3rem;">👥</span> Clientes</button>
+        <button class="nav-item" onclick="irParaFinanceiro()"><span class="nav-icon" style="font-size:1.3rem;">💰</span> Financeiro</button>
     </nav>
 
     <script>
@@ -185,6 +183,12 @@
             loader.style.display = mostrar ? 'flex' : 'none'; 
         }
 
+
+        function irParaFinanceiro() {
+            // Como os dois arquivos vão estar juntos no seu GitHub, é só chamar pelo nome!
+            window.location.href = 'financeiro.html';
+        }
+        
         function mudarAba(abaId, elementoBtn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
