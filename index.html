@@ -479,15 +479,24 @@
                     </tr>`;
                 }).join('');
 
-                // A ESTRUTURA BLINDADA COM TABELAS (A mesma técnica do RV Blocos)
+                // LARGURA AJUSTADA PARA 760px (Para não cortar) E CABEÇALHO DIVIDIDO
                 const htmlParaO_PDF = `
-                <div style="font-family: Arial, sans-serif; padding: 30px; background: white; width: 800px; box-sizing: border-box;">
+                <div style="font-family: Arial, sans-serif; padding: 20px; background: white; width: 760px; box-sizing: border-box; margin: 0 auto;">
                     
-                    <div style="text-align: center; border-bottom: 3px solid #1E293B; padding-bottom: 20px; margin-bottom: 25px;">
-                        <h1 style="color: #1E293B; font-size: 28px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">THIAGO PINTOR</h1>
-                        <h2 style="font-size: 16px; color: #374151; margin: 5px 0 0 0; font-weight: 600;">Thiago Pereira da Silva &nbsp;|&nbsp; CPF: 005.552.121-57</h2>
-                        <p style="color: #6B7280; font-size: 14px; margin: 5px 0 0 0;">📞 (64) 99904-6567 / (64) 99908-8480</p>
-                    </div>
+                    <table width="100%" style="border-bottom: 3px solid #1E293B; padding-bottom: 20px; margin-bottom: 25px;">
+                        <tr>
+                            <td valign="middle" style="text-align: left;">
+                                <h1 style="color: #1E293B; font-size: 28px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">THIAGO PINTOR</h1>
+                                <h2 style="font-size: 14px; color: #374151; margin: 5px 0 0 0; font-weight: 600;">Thiago Pereira da Silva &nbsp;|&nbsp; CPF: 005.552.121-57</h2>
+                                <p style="color: #6B7280; font-size: 12px; margin: 5px 0 0 0;">📞 (64) 99904-6567 / (64) 99908-8480</p>
+                            </td>
+                            <td align="right" valign="middle" style="width: 150px;">
+                                <div style="width: 120px; height: 70px; background: #F3F4F6; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9CA3AF; text-align: center; border-radius: 8px; margin-left: auto;">
+                                    Logo <br>Empresa
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
 
                     <table width="100%" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; margin-bottom: 25px; padding: 15px;">
                         <tr>
@@ -531,11 +540,12 @@
                 const container = document.createElement('div');
                 container.innerHTML = htmlParaO_PDF;
 
+                // TRAVA DE LARGURA DO CANVAS: windowWidth 780 força o celular a renderizar como se fosse tela de PC
                 const opt = {
                     margin:       [10, 10, 10, 10], 
                     filename:     `Orcamento_${idFormatado}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, 
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 780 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
