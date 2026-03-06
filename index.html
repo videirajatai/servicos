@@ -41,12 +41,14 @@
         .btn-header { width: auto; padding: 8px 12px; font-size: 0.9rem; margin-top: 0; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
         
         .acoes-card { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-share-text { background: #25D366; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; }
-        .btn-share-pdf { background: #EF4444; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; }
+        .btn-share-text { background: #25D366; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; border-radius: 8px; }
+        .btn-share-pdf { background: #EF4444; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; border-radius: 8px; }
 
         .header-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--primary); color: white; font-size: 2rem; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4); display: flex; align-items: center; justify-content: center; z-index: 100; margin-top: 0; padding: 0; }
-        .orcamento-salvo-card { border-left: 4px solid var(--primary); padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .item-card { border-left: 4px solid var(--primary); padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .item-card-cliente { border-left-color: var(--success); } /* Cor diferente para diferenciar clientes */
         
         .servico-item { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: #fafafa; }
         .btn-remover { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); font-size: 1.5rem; width: auto; padding: 0; margin: 0; }
@@ -61,7 +63,7 @@
         /* Loader */
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 999; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 1.2rem; }
 
-        /* PDF CSS - Ajustado para evitar cortes na lateral */
+        /* PDF CSS */
         #pdf-container { position: absolute; left: -9999px; top: 0; }
         .pdf-layout { width: 100%; max-width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif; box-sizing: border-box; }
         .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1F2937; padding-bottom: 20px; margin-bottom: 20px; }
@@ -93,7 +95,7 @@
         </div>
 
         <div id="tela-novo-orcamento" style="display: none;">
-            <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaLista()">⬅ Voltar</button>
+            <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaListaOrcamentos()">⬅ Voltar</button>
             <div class="card">
                 <label>Selecionar Cliente</label>
                 <select id="clienteSelect">
@@ -114,18 +116,24 @@
     </main>
 
     <main id="view-cliente" class="view">
-        <div class="card">
-            <h3 style="margin-bottom: 10px;">Cadastrar Novo Cliente</h3>
-            <label>Nome Completo</label><input type="text" id="cliNome" placeholder="Ex: João da Silva">
-            <label>CPF / CNPJ</label><input type="text" id="cliCpf" placeholder="Apenas números">
-            <label>Telefone</label><input type="text" id="cliTel" placeholder="(00) 00000-0000">
-            <label>Endereço Completo</label><input type="text" id="cliEnd" placeholder="Rua, Número, Bairro">
-            <button class="btn-primary" id="btnSalvarCli" onclick="salvarClienteNoGAS()">💾 Salvar Cliente</button>
+        <div id="tela-lista-clientes">
+            <div class="header-lista">
+                <h3>Clientes Cadastrados</h3>
+                <button class="btn-header" onclick="carregarDadosDoGAS()">🔄 Atualizar</button>
+            </div>
+            <div id="container-lista-cli"></div>
+            <button class="fab" onclick="abrirNovoCliente()">+</button>
         </div>
 
-        <div class="card">
-            <h3 style="margin-bottom: 15px;">Clientes Cadastrados</h3>
-            <div id="container-lista-cli"></div>
+        <div id="tela-novo-cliente" style="display: none;">
+            <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaListaClientes()">⬅ Voltar</button>
+            <div class="card">
+                <label>Nome Completo</label><input type="text" id="cliNome" placeholder="Ex: João da Silva">
+                <label>CPF / CNPJ</label><input type="text" id="cliCpf" placeholder="Apenas números">
+                <label>Telefone</label><input type="text" id="cliTel" placeholder="(00) 00000-0000">
+                <label>Endereço Completo</label><input type="text" id="cliEnd" placeholder="Rua, Número, Bairro">
+                <button class="btn-primary" id="btnSalvarCli" onclick="salvarClienteNoGAS()">💾 Salvar Cliente</button>
+            </div>
         </div>
     </main>
 
@@ -161,8 +169,8 @@
     </div>
 
     <script>
-        // === COLOQUE AQUI A NOVA URL DO SEU GOOGLE APPS SCRIPT ===
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
+        // MANTENHA A SUA URL AQUI
+        const API_URL = 'SUA_URL_DO_GAS_AQUI'; 
 
         let dadosClientes = [];
         let orcamentosSalvos = [];
@@ -179,15 +187,27 @@
             document.getElementById('header-title').innerText = titulos[abaId];
         }
 
+        // --- CONTROLE DE TELAS (ORÇAMENTOS) ---
         function abrirNovoOrcamento() {
             document.getElementById('tela-lista-orcamentos').style.display = 'none';
             document.getElementById('tela-novo-orcamento').style.display = 'block';
             if(document.getElementById('lista-servicos').children.length === 0) adicionarServico();
         }
 
-        function voltarParaLista() {
+        function voltarParaListaOrcamentos() {
             document.getElementById('tela-novo-orcamento').style.display = 'none';
             document.getElementById('tela-lista-orcamentos').style.display = 'block';
+        }
+
+        // --- CONTROLE DE TELAS (CLIENTES) ---
+        function abrirNovoCliente() {
+            document.getElementById('tela-lista-clientes').style.display = 'none';
+            document.getElementById('tela-novo-cliente').style.display = 'block';
+        }
+
+        function voltarParaListaClientes() {
+            document.getElementById('tela-novo-cliente').style.display = 'none';
+            document.getElementById('tela-lista-clientes').style.display = 'block';
         }
 
         // --- COMUNICAÇÃO COM GAS (PLANILHA) ---
@@ -198,12 +218,10 @@
                 const res = await response.json();
                 
                 if (res.status === 'sucesso') {
-                    // Mapeia Clientes
                     dadosClientes = res.clientes.map(c => ({ nome: c[0], cpf: c[1], tel: c[2], end: c[3] }));
                     atualizarSelectClientes();
                     renderizarListaClientes();
 
-                    // Mapeia Orçamentos (Lê de trás pra frente para os mais novos ficarem no topo)
                     orcamentosSalvos = res.orcamentos.map(o => ({
                         id: o[0], data: o[1], cliente: o[2], total: o[3], itens: JSON.parse(o[4] || '[]')
                     })).reverse();
@@ -236,7 +254,8 @@
                     alert('Cliente salvo na planilha!');
                     document.getElementById('cliNome').value = ''; document.getElementById('cliCpf').value = '';
                     document.getElementById('cliTel').value = ''; document.getElementById('cliEnd').value = '';
-                    carregarDadosDoGAS(); // Atualiza as listas
+                    voltarParaListaClientes();
+                    carregarDadosDoGAS();
                 }
             } catch(e) { alert("Erro ao salvar cliente."); }
             mostrarLoader(false);
@@ -247,7 +266,6 @@
             const totalFormatado = document.getElementById('totalDisplay').innerText;
             const itensArray = [];
             
-            // Coleta itens para o DB
             document.querySelectorAll('.servico-item').forEach(item => {
                 const desc = item.querySelector('.desc-servico').value || "Serviço sem nome";
                 const tipo = item.querySelector('.tipo-cobranca').value;
@@ -288,7 +306,7 @@
                     alert('Orçamento salvo na planilha!');
                     document.getElementById('lista-servicos').innerHTML = '';
                     document.getElementById('totalDisplay').innerText = 'R$ 0,00';
-                    voltarParaLista();
+                    voltarParaListaOrcamentos();
                     carregarDadosDoGAS();
                 }
             } catch(e) { alert("Erro ao salvar orçamento."); }
@@ -308,12 +326,18 @@
 
         function renderizarListaClientes() {
             const container = document.getElementById('container-lista-cli');
-            container.innerHTML = dadosClientes.length === 0 ? '<p style="color:#6B7280; font-size:0.9rem;">Nenhum cliente salvo.</p>' : '';
+            container.innerHTML = dadosClientes.length === 0 ? '<p style="text-align:center; color:#6B7280; margin-top:30px;">Nenhum cliente salvo.</p>' : '';
+            
             dadosClientes.forEach(c => {
-                container.innerHTML += `<div style="border-bottom: 1px solid #E5E7EB; padding: 10px 0;">
-                    <strong>${c.nome}</strong><br>
-                    <span style="font-size:0.8rem; color:#6B7280;">${c.tel} | ${c.end}</span>
-                </div>`;
+                container.innerHTML += `
+                    <div class="item-card item-card-cliente">
+                        <strong style="font-size: 1.1rem; color: var(--text-main);">${c.nome}</strong><br>
+                        <div style="font-size:0.85rem; color:#6B7280; margin-top: 5px;">
+                            ${c.tel ? `📞 ${c.tel}<br>` : ''}
+                            ${c.end ? `📍 ${c.end}` : ''}
+                        </div>
+                    </div>
+                `;
             });
         }
 
@@ -322,13 +346,12 @@
             container.innerHTML = orcamentosSalvos.length === 0 ? '<p style="text-align:center; color:#6B7280; margin-top:30px;">Nenhum orçamento na planilha.</p>' : '';
             
             orcamentosSalvos.forEach(orc => {
-                // Monta o texto resumo pro WhatsApp
                 let resumoTexto = `*Orçamento de Pintura*\n\n*Cliente:* ${orc.cliente}\n*Data:* ${orc.data}\n\n*Serviços:*\n`;
                 orc.itens.forEach(i => { resumoTexto += `- ${i.descricao}\n`; });
-                resumoTexto += `*Total:* ${orc.total}`;
+                resumoTexto += `\n*Total:* ${orc.total}`;
 
                 container.innerHTML += `
-                    <div class="orcamento-salvo-card">
+                    <div class="item-card">
                         <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
                             <strong style="font-size: 1.1rem;">${orc.cliente}</strong>
                             <span style="color: #6B7280; font-size: 0.8rem;">${orc.data}</span>
@@ -423,10 +446,9 @@
 
                 const elemento = document.getElementById('pdf-template');
                 const opt = {
-                    margin:       [10, 10, 10, 10], // Margem de respiro para garantir o A4
+                    margin:       [10, 10, 10, 10], 
                     filename:     `Orcamento_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    // windowWidth força o HTML2Canvas a "enxergar" o documento como num desktop (sem cortar a borda)
                     html2canvas:  { scale: 2, windowWidth: 800 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
@@ -447,7 +469,7 @@
         }
 
         // Inicialização
-        carregarDadosDoGAS();
+        window.onload = carregarDadosDoGAS;
     </script>
 </body>
 </html>
