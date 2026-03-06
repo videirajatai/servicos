@@ -460,6 +460,7 @@
         function abrirWhatsApp(textoCodificado) { window.open(`https://wa.me/?text=${textoCodificado}`, '_blank'); }
 
         // A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
+// A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
         async function gerarECompartilharPDF(id, btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '⏳ Gerando...'; btnElement.disabled = true;
@@ -479,9 +480,9 @@
                     </tr>`;
                 }).join('');
 
-                // LARGURA AJUSTADA PARA 760px (Para não cortar) E CABEÇALHO DIVIDIDO
+                // LARGURA VOLTOU PARA 800px COM AS TRAVAS NO CANVAS
                 const htmlParaO_PDF = `
-                <div style="font-family: Arial, sans-serif; padding: 20px; background: white; width: 760px; box-sizing: border-box; margin: 0 auto;">
+                <div style="font-family: Arial, sans-serif; padding: 20px; background: white; width: 800px; box-sizing: border-box; margin: 0;">
                     
                     <table width="100%" style="border-bottom: 3px solid #1E293B; padding-bottom: 20px; margin-bottom: 25px;">
                         <tr>
@@ -540,12 +541,18 @@
                 const container = document.createElement('div');
                 container.innerHTML = htmlParaO_PDF;
 
-                // TRAVA DE LARGURA DO CANVAS: windowWidth 780 força o celular a renderizar como se fosse tela de PC
+                // O SEGREDO ESTÁ AQUI: width: 800 e windowWidth: 800 forçam a captura total!
                 const opt = {
                     margin:       [10, 10, 10, 10], 
                     filename:     `Orcamento_${idFormatado}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 780 }, 
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        scrollY: 0, 
+                        windowWidth: 800, 
+                        width: 800 
+                    }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
