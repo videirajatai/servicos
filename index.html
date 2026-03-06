@@ -131,115 +131,58 @@
     </nav>
 
     <script>
-        // COLOQUE AQUI A URL DO SEU GOOGLE APPS SCRIPT
-// 1. Substitua esta URL pela URL gerada no seu Google Apps Script!
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
-
-        // Função para salvar o orçamento na planilha
-        async function salvarOrcamento() {
-            const cliente = document.getElementById('nomeCliente').value;
-            const btn = document.querySelector('#view-orcamento .btn-primary');
+            function adicionarServico() {
+            const listaServicos = document.getElementById('lista-servicos');
             
-            if (!cliente) {
-                alert("Por favor, preencha o nome do cliente.");
-                return;
-            }
-
-            // Muda o visual do botão para mostrar que está carregando
-            btn.innerText = 'Salvando...';
-            btn.disabled = true;
-
-            // Coleta todos os serviços digitados
-            const servicos = [];
-            let total = 0;
-            document.querySelectorAll('.servico-item').forEach(item => {
-                const desc = item.querySelector('.desc-servico').value;
-                const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
-                const valor = parseFloat(item.querySelector('.valor-servico').value) || 0;
+            // Cria a div que vai conter os campos
+            const servicoItem = document.createElement('div');
+            servicoItem.className = 'servico-item card'; // Usa as classes já definidas no seu CSS
+            
+            // Monta o HTML dos campos de entrada
+            servicoItem.innerHTML = `
+                <button class="btn-remover" onclick="removerServico(this)" title="Remover Serviço">&times;</button>
                 
-                if (desc) { // Só adiciona se tiver descrição
-                    servicos.push({ descricao: desc, quantidade: qtd, valorUnitario: valor });
-                    total += (qtd * valor);
-                }
-            });
-
-            const payload = {
-                action: 'salvarOrcamento',
-                cliente: cliente,
-                servicos: servicos,
-                total: total
-            };
-
-            try {
-                // Envia os dados para o Google Apps Script
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
+                <label>Descrição do Serviço</label>
+                <input type="text" class="desc-servico" placeholder="Ex: Preparação e pintura de parede">
                 
-                const resultado = await response.json();
-                
-                if (resultado.status === 'sucesso') {
-                    alert('Orçamento salvo com sucesso na aba "Orcamentos"!');
-                    // Opcional: Aqui podemos limpar o formulário para o próximo
-                } else {
-                    alert('Erro no servidor: ' + resultado.mensagem);
-                }
-            } catch (erro) {
-                alert('Erro de conexão. Verifique se a URL da API está correta.');
-                console.error(erro);
-            } finally {
-                // Restaura o botão
-                btn.innerText = 'Salvar e Gerar Resumo';
-                btn.disabled = false;
-            }
+                <div class="row-2">
+                    <div>
+                        <label>Quantidade (m², un, etc)</label>
+                        <input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()">
+                    </div>
+                    <div>
+                        <label>Valor Unitário (R$)</label>
+                        <input type="number" class="valor-servico" placeholder="0.00" oninput="calcularTotal()">
+                    </div>
+                </div>
+            `;
+            
+            // Adiciona o novo bloco à lista
+            listaServicos.appendChild(servicoItem);
         }
 
-        // Função para salvar entradas e saídas financeiras
-        async function salvarLancamento() {
-            const dataLanc = document.getElementById('finData').value;
-            const tipo = document.getElementById('finTipo').value;
-            const desc = document.getElementById('finDesc').value;
-            const valor = document.getElementById('finValor').value;
-            const btn = document.querySelector('#view-financeiro .btn-success');
+        // Função para remover um serviço específico
+        function removerServico(botao) {
+            botao.parentElement.remove(); // Remove a div .servico-item
+            calcularTotal(); // Recalcula o total após remover
+        }
 
-            if (!dataLanc || !desc || !valor) {
-                alert('Preencha data, descrição e valor para registrar.');
-                return;
-            }
-
-            btn.innerText = 'Registrando...';
-            btn.disabled = true;
-
-            const payload = {
-                action: 'salvarFinanceiro',
-                data: dataLanc,
-                tipo: tipo,
-                descricao: desc,
-                valor: parseFloat(valor)
-            };
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                
-                const resultado = await response.json();
-                
-                if (resultado.status === 'sucesso') {
-                    alert('Lançamento salvo na aba "Financeiro"!');
-                    document.getElementById('finDesc').value = ''; // Limpa a descrição
-                    document.getElementById('finValor').value = ''; // Limpa o valor
-                } else {
-                    alert('Erro no servidor: ' + resultado.mensagem);
-                }
-            } catch (erro) {
-                alert('Erro de conexão.');
-            } finally {
-                btn.innerText = 'Registrar';
-                btn.disabled = false;
-            }
+        // Função para calcular e atualizar o valor total do orçamento na tela
+        function calcularTotal() {
+            let total = 0;
+            const itens = document.querySelectorAll('.servico-item');
+            
+            itens.forEach(item => {
+                const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
+                const valor = parseFloat(item.querySelector('.valor-servico').value) || 0;
+                total += (qtd * valor);
+            });
+            
+            // Atualiza a div de exibição do total formatando como Moeda (BRL)
+            document.getElementById('totalDisplay').innerText = total.toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            });
         }
     </script>
 </body>
