@@ -1,211 +1,109 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistema de Pinturas</title>
-    <style>
-        :root {
-            --primary: #4F46E5; /* Indigo moderno */
-            --bg-color: #F3F4F6;
-            --surface: #FFFFFF;
-            --text-main: #1F2937;
-            --text-muted: #6B7280;
-            --success: #10B981;
-            --danger: #EF4444;
-            --border: #E5E7EB;
-        }
+// 1. Substitua esta URL pela URL gerada no seu Google Apps Script!
+        const API_URL = 'COLE_A_URL_DO_SEU_WEB_APP_AQUI'; 
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
-        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
-
-        /* Cabeçalho */
-        header { background: var(--primary); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 10; }
-
-        /* Views (Abas) */
-        .view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
-        .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Formulários e Cards */
-        .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; margin-top: 15px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--bg-color); outline: none; }
-        input:focus, select:focus { border-color: var(--primary); }
-        
-        /* Sistema Dinâmico de Serviços */
-        .servico-item { border-left: 3px solid var(--primary); padding-left: 10px; margin-bottom: 15px; position: relative; }
-        .btn-remover { position: absolute; top: 0; right: 0; background: none; border: none; color: var(--danger); font-size: 1.5rem; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        /* Botões */
-        button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: transparent; color: var(--primary); border: 2px dashed var(--primary); }
-        .btn-success { background: var(--success); color: white; }
-
-        /* Dashboard Financeiro */
-        .dash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .dash-card { padding: 15px; border-radius: 8px; text-align: center; color: white; font-weight: bold; }
-        .dash-entrada { background: var(--success); }
-        .dash-saida { background: var(--danger); }
-        .dash-saldo { background: var(--text-main); grid-column: span 2; }
-
-        /* Navegação Inferior */
-        nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 10; border-top: 1px solid var(--border); }
-        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 1.5rem; }
-
-        .total-orcamento { font-size: 1.5rem; text-align: right; color: var(--primary); font-weight: bold; margin-top: 10px; }
-    </style>
-</head>
-<body>
-
-    <header id="header-title">Orçamentos</header>
-
-    <main id="view-orcamento" class="view active">
-        <div class="card">
-            <label>Cliente / Obra</label>
-            <input type="text" id="nomeCliente" placeholder="Ex: Casa do João - Fachada">
-            
-            <h3 style="margin-top: 25px; font-size: 1.1rem;">Serviços</h3>
-            <div id="lista-servicos">
-                </div>
-            
-            <button class="btn-outline" onclick="adicionarServico()">+ Adicionar Serviço</button>
-            
-            <div style="margin-top: 20px; border-top: 1px solid #E5E7EB; padding-top: 15px;">
-                <label>Total do Orçamento</label>
-                <div class="total-orcamento" id="totalDisplay">R$ 0,00</div>
-            </div>
-
-            <button class="btn-primary" onclick="salvarOrcamento()">Salvar e Gerar Resumo</button>
-        </div>
-    </main>
-
-    <main id="view-financeiro" class="view">
-        <div class="card">
-            <label>Filtrar por Mês</label>
-            <input type="month" id="mesFiltro" onchange="carregarFinanceiro()">
-
-            <div class="dash-cards">
-                <div class="dash-card dash-entrada">Entradas<br>R$ 0,00</div>
-                <div class="dash-card dash-saida">Saídas<br>R$ 0,00</div>
-                <div class="dash-card dash-saldo">Resultado<br>R$ 0,00</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 10px;">Novo Lançamento</h3>
-            <label>Data</label>
-            <input type="date" id="finData">
-            
-            <label>Tipo</label>
-            <select id="finTipo">
-                <option value="Entrada">Entrada</option>
-                <option value="Saida">Saída (Despesa)</option>
-            </select>
-
-            <label>Descrição</label>
-            <input type="text" id="finDesc" placeholder="Ex: Tintas Suvinil ou Pagamento João">
-            
-            <label>Valor</label>
-            <input type="number" id="finValor" placeholder="R$ 0,00">
-
-            <button class="btn-success" onclick="salvarLancamento()">Registrar</button>
-        </div>
-    </main>
-
-    <nav class="bottom-nav">
-        <button class="nav-item active" onclick="mudarAba('orcamento', this)">
-            <span class="nav-icon">📝</span> Orçamentos
-        </button>
-        <button class="nav-item" onclick="mudarAba('financeiro', this)">
-            <span class="nav-icon">💰</span> Financeiro
-        </button>
-        <button class="nav-item" onclick="mudarAba('cliente', this)">
-            <span class="nav-icon">👥</span> Clientes
-        </button>
-    </nav>
-
-    <script>
-        // COLOQUE AQUI A URL DO SEU GOOGLE APPS SCRIPT
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
-
-        // Lógica de Abas
-        function mudarAba(abaId, elementoBtn) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            
-            let abaParaMostrar = document.getElementById('view-' + abaId);
-            if(abaParaMostrar) abaParaMostrar.classList.add('active');
-            elementoBtn.classList.add('active');
-
-            const titulos = { 'orcamento': 'Orçamentos', 'financeiro': 'Financeiro', 'cliente': 'Clientes' };
-            document.getElementById('header-title').innerText = titulos[abaId];
-        }
-
-        // Sistema Dinâmico de Serviços do Orçamento
-        let servicoContador = 0;
-
-        function adicionarServico() {
-            const div = document.createElement('div');
-            div.className = 'servico-item';
-            div.id = `servico-${servicoContador}`;
-            
-            div.innerHTML = `
-                <button class="btn-remover" onclick="removerServico('${div.id}')">&times;</button>
-                <label>Descrição do Serviço</label>
-                <input type="text" class="desc-servico" placeholder="Ex: Pintura interna massa corrida">
-                <div class="row-2">
-                    <div>
-                        <label>Qtd / Metragem</label>
-                        <input type="number" class="qtd-servico" value="1" oninput="calcularTotal()">
-                    </div>
-                    <div>
-                        <label>Valor Unitário (R$)</label>
-                        <input type="number" class="valor-servico" placeholder="0.00" oninput="calcularTotal()">
-                    </div>
-                </div>
-            `;
-            document.getElementById('lista-servicos').appendChild(div);
-            servicoContador++;
-        }
-
-        function removerServico(id) {
-            document.getElementById(id).remove();
-            calcularTotal();
-        }
-
-        function calcularTotal() {
-            let total = 0;
-            const servicos = document.querySelectorAll('.servico-item');
-            servicos.forEach(item => {
-                const qtd = item.querySelector('.qtd-servico').value || 0;
-                const valor = item.querySelector('.valor-servico').value || 0;
-                total += (parseFloat(qtd) * parseFloat(valor));
-            });
-            document.getElementById('totalDisplay').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        // Função para testar a comunicação (pode ser incrementada depois com a chamada fetch)
-        function salvarOrcamento() {
+        // Função para salvar o orçamento na planilha
+        async function salvarOrcamento() {
             const cliente = document.getElementById('nomeCliente').value;
-            alert("Orçamento pronto para envio! (O JS de comunicação com o GAS entrará aqui no próximo passo)");
+            const btn = document.querySelector('#view-orcamento .btn-primary');
+            
+            if (!cliente) {
+                alert("Por favor, preencha o nome do cliente.");
+                return;
+            }
+
+            // Muda o visual do botão para mostrar que está carregando
+            btn.innerText = 'Salvando...';
+            btn.disabled = true;
+
+            // Coleta todos os serviços digitados
+            const servicos = [];
+            let total = 0;
+            document.querySelectorAll('.servico-item').forEach(item => {
+                const desc = item.querySelector('.desc-servico').value;
+                const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
+                const valor = parseFloat(item.querySelector('.valor-servico').value) || 0;
+                
+                if (desc) { // Só adiciona se tiver descrição
+                    servicos.push({ descricao: desc, quantidade: qtd, valorUnitario: valor });
+                    total += (qtd * valor);
+                }
+            });
+
+            const payload = {
+                action: 'salvarOrcamento',
+                cliente: cliente,
+                servicos: servicos,
+                total: total
+            };
+
+            try {
+                // Envia os dados para o Google Apps Script
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                const resultado = await response.json();
+                
+                if (resultado.status === 'sucesso') {
+                    alert('Orçamento salvo com sucesso na aba "Orcamentos"!');
+                    // Opcional: Aqui podemos limpar o formulário para o próximo
+                } else {
+                    alert('Erro no servidor: ' + resultado.mensagem);
+                }
+            } catch (erro) {
+                alert('Erro de conexão. Verifique se a URL da API está correta.');
+                console.error(erro);
+            } finally {
+                // Restaura o botão
+                btn.innerText = 'Salvar e Gerar Resumo';
+                btn.disabled = false;
+            }
         }
 
-        function salvarLancamento() {
-            alert("Lançamento salvo! (Conexão com a planilha em breve)");
-        }
+        // Função para salvar entradas e saídas financeiras
+        async function salvarLancamento() {
+            const dataLanc = document.getElementById('finData').value;
+            const tipo = document.getElementById('finTipo').value;
+            const desc = document.getElementById('finDesc').value;
+            const valor = document.getElementById('finValor').value;
+            const btn = document.querySelector('#view-financeiro .btn-success');
 
-        // Inicia com um serviço em branco
-        adicionarServico();
-        
-        // Seta o mês atual no filtro financeiro
-        const hoje = new Date();
-        document.getElementById('mesFiltro').value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
-    </script>
-</body>
-</html>
+            if (!dataLanc || !desc || !valor) {
+                alert('Preencha data, descrição e valor para registrar.');
+                return;
+            }
+
+            btn.innerText = 'Registrando...';
+            btn.disabled = true;
+
+            const payload = {
+                action: 'salvarFinanceiro',
+                data: dataLanc,
+                tipo: tipo,
+                descricao: desc,
+                valor: parseFloat(valor)
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                const resultado = await response.json();
+                
+                if (resultado.status === 'sucesso') {
+                    alert('Lançamento salvo na aba "Financeiro"!');
+                    document.getElementById('finDesc').value = ''; // Limpa a descrição
+                    document.getElementById('finValor').value = ''; // Limpa o valor
+                } else {
+                    alert('Erro no servidor: ' + resultado.mensagem);
+                }
+            } catch (erro) {
+                alert('Erro de conexão.');
+            } finally {
+                btn.innerText = 'Registrar';
+                btn.disabled = false;
+            }
+        }
