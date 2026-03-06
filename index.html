@@ -48,7 +48,7 @@
         .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--primary); color: white; font-size: 2rem; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4); display: flex; align-items: center; justify-content: center; z-index: 100; margin-top: 0; padding: 0; }
         
         .item-card { border-left: 4px solid var(--primary); padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .item-card-cliente { border-left-color: var(--success); } /* Cor diferente para diferenciar clientes */
+        .item-card-cliente { border-left-color: var(--success); } 
         
         .servico-item { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: #fafafa; }
         .btn-remover { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); font-size: 1.5rem; width: auto; padding: 0; margin: 0; }
@@ -63,25 +63,35 @@
         /* Loader */
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 999; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 1.2rem; }
 
-        /* PDF CSS */
+        /* === PDF NOVO LAYOUT MODERNIZADO E CENTRALIZADO === */
         #pdf-container { position: absolute; left: -9999px; top: 0; }
-        .pdf-layout { width: 100%; max-width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif; box-sizing: border-box; }
-        .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1F2937; padding-bottom: 20px; margin-bottom: 20px; }
-        .pdf-logo-box { width: 150px; height: 80px; background: #F3F4F6; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9CA3AF; text-align: center; }
-        .pdf-company-info { text-align: right; }
-        .pdf-company-info h1 { margin: 0; color: #1F2937; font-size: 1.8rem; }
-        .pdf-company-info p { margin: 5px 0 0 0; color: #4B5563; font-size: 0.9rem; }
-        .pdf-client-box { background: #F9FAFB; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #E5E7EB; }
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .pdf-table th { background: #1F2937; color: white; padding: 12px; text-align: left; font-size: 0.9rem; border: 1px solid #1F2937; }
-        .pdf-table td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.9rem; border-left: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB; }
-        .pdf-total-box { text-align: right; padding: 20px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 1.2rem; }
-        .pdf-footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px; }
+        .pdf-layout { width: 100%; max-width: 800px; padding: 40px; background: white; color: #1F2937; font-family: 'Segoe UI', system-ui, Arial, sans-serif; box-sizing: border-box; }
+        
+        .pdf-header { text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 20px; margin-bottom: 25px; }
+        .pdf-header h1 { color: var(--primary); font-size: 2.2rem; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .pdf-header h2 { font-size: 1.1rem; color: #374151; margin: 5px 0; font-weight: 500; }
+        .pdf-header p { color: #6B7280; font-size: 0.95rem; margin: 2px 0; }
+        
+        .pdf-info-grid { display: flex; justify-content: space-between; background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 25px; }
+        .pdf-info-col { display: flex; flex-direction: column; gap: 5px; }
+        .pdf-info-col strong { color: #1F2937; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pdf-info-col span { color: #4B5563; font-size: 1.1rem; }
+        
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+        .pdf-table th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 0.9rem; text-transform: uppercase; }
+        .pdf-table th:not(:first-child), .pdf-table td:not(:first-child) { text-align: center; } /* Centraliza quantidades e valores */
+        .pdf-table td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.95rem; color: #374151; }
+        .pdf-table tr:nth-child(even) { background-color: #F9FAFB; } /* Linhas listradas */
+        
+        .pdf-total-box { display: flex; justify-content: flex-end; align-items: center; padding: 15px 20px; background: #F3F4F6; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 1.4rem; color: #1F2937; }
+        .pdf-total-box span { font-weight: bold; color: var(--primary); margin-left: 15px; }
+        
+        .pdf-footer { margin-top: 40px; text-align: center; font-size: 0.85rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="loader">Sincronizando com a Planilha...</div>
+    <div id="loader">Carregando...</div>
     <header id="header-title">Orçamentos</header>
 
     <main id="view-orcamento" class="view active">
@@ -100,7 +110,7 @@
                 <label>Selecionar Cliente</label>
                 <select id="clienteSelect">
                     <option value="Consumidor Final">Consumidor Final</option>
-                    </select>
+                </select>
                 
                 <h3 style="margin-top: 25px; font-size: 1.1rem;">Serviços</h3>
                 <div id="lista-servicos"></div>
@@ -147,24 +157,40 @@
 
     <div id="pdf-container">
         <div id="pdf-template" class="pdf-layout">
+            
             <div class="pdf-header">
-                <div class="pdf-logo-box">Logo <br>Empresa</div>
-                <div class="pdf-company-info">
-                    <h1>ORÇAMENTO</h1>
-                    <p>Pinturas & Reformas Profissionais</p>
+                <h1>THIAGO PINTOR</h1>
+                <h2>Thiago Pereira da Silva &nbsp;|&nbsp; CPF: 005.552.121-57</h2>
+                <p>📞 (64) 99904-6567 / (64) 99908-8480</p>
+            </div>
+            
+            <div class="pdf-info-grid">
+                <div class="pdf-info-col">
+                    <strong>Cliente / Obra</strong>
+                    <span id="pdf-cliente-nome"></span>
+                </div>
+                <div class="pdf-info-col" style="text-align: right;">
+                    <strong>Orçamento Nº</strong>
+                    <span id="pdf-id" style="font-weight: bold; color: var(--primary);"></span>
+                    <strong style="margin-top: 5px;">Data</strong>
+                    <span id="pdf-data"></span>
                 </div>
             </div>
-            <div class="pdf-client-box">
-                <strong>Cliente / Obra:</strong> <span id="pdf-cliente-nome"></span><br>
-                <strong>Data:</strong> <span id="pdf-data"></span><br>
-                <strong>Orçamento Nº:</strong> <span id="pdf-id"></span>
-            </div>
+
             <table class="pdf-table">
-                <thead><tr><th>Descrição</th><th>Medida/Qtd</th><th>V. Unitário</th><th>Subtotal</th></tr></thead>
+                <thead><tr><th>Descrição do Serviço</th><th>Medida/Qtd</th><th>V. Unitário</th><th>Subtotal</th></tr></thead>
                 <tbody id="pdf-tabela-corpo"></tbody>
             </table>
-            <div class="pdf-total-box"><strong>Valor Total: <span id="pdf-total-valor"></span></strong></div>
-            <div class="pdf-footer"><p>Orçamento válido por 15 dias.</p><p>Agradecemos a preferência!</p></div>
+            
+            <div class="pdf-total-box">
+                Valor Total: <span id="pdf-total-valor"></span>
+            </div>
+            
+            <div class="pdf-footer">
+                <p>Orçamento válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo.</p>
+                <p><strong>Agradecemos a preferência!</strong></p>
+            </div>
+            
         </div>
     </div>
 
@@ -187,7 +213,6 @@
             document.getElementById('header-title').innerText = titulos[abaId];
         }
 
-        // --- CONTROLE DE TELAS (ORÇAMENTOS) ---
         function abrirNovoOrcamento() {
             document.getElementById('tela-lista-orcamentos').style.display = 'none';
             document.getElementById('tela-novo-orcamento').style.display = 'block';
@@ -199,7 +224,6 @@
             document.getElementById('tela-lista-orcamentos').style.display = 'block';
         }
 
-        // --- CONTROLE DE TELAS (CLIENTES) ---
         function abrirNovoCliente() {
             document.getElementById('tela-lista-clientes').style.display = 'none';
             document.getElementById('tela-novo-cliente').style.display = 'block';
@@ -222,9 +246,20 @@
                     atualizarSelectClientes();
                     renderizarListaClientes();
 
-                    orcamentosSalvos = res.orcamentos.map(o => ({
-                        id: o[0], data: o[1], cliente: o[2], total: o[3], itens: JSON.parse(o[4] || '[]')
-                    })).reverse();
+                    orcamentosSalvos = res.orcamentos.map(o => {
+                        // FORÇA O FORMATO R$ CASO O GOOGLE SHEETS TENHA DEVOLVIDO COMO NÚMERO SECO
+                        let valTotal = o[3];
+                        if (!isNaN(valTotal) && valTotal !== '') {
+                            valTotal = parseFloat(valTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        } else if (typeof valTotal === 'string' && !valTotal.includes('R$')) {
+                            valTotal = `R$ ${valTotal}`; 
+                        }
+
+                        return {
+                            id: o[0], data: o[1], cliente: o[2], total: valTotal, itens: JSON.parse(o[4] || '[]')
+                        };
+                    }).reverse(); // Reverse para o mais novo ficar no topo
+                    
                     renderizarListaOrcamentos();
                 }
             } catch (e) {
@@ -289,9 +324,17 @@
 
             if(itensArray.length === 0) return alert('Adicione pelo menos um serviço com valor.');
 
+            // LÓGICA DO ID SEQUENCIAL
+            let novoId = 1;
+            if (orcamentosSalvos.length > 0) {
+                // Pega todos os IDs existentes, acha o maior e soma 1
+                const ids = orcamentosSalvos.map(orc => parseInt(orc.id) || 0);
+                novoId = Math.max(...ids) + 1;
+            }
+
             const payload = {
                 action: 'salvarOrcamento',
-                id: Date.now(),
+                id: novoId, 
                 data: new Date().toLocaleDateString('pt-BR'),
                 cliente: cliente,
                 total: totalFormatado,
@@ -346,7 +389,9 @@
             container.innerHTML = orcamentosSalvos.length === 0 ? '<p style="text-align:center; color:#6B7280; margin-top:30px;">Nenhum orçamento na planilha.</p>' : '';
             
             orcamentosSalvos.forEach(orc => {
-                let resumoTexto = `*Orçamento de Pintura*\n\n*Cliente:* ${orc.cliente}\n*Data:* ${orc.data}\n\n*Serviços:*\n`;
+                const idVisual = String(orc.id).padStart(4, '0'); // Mostra 0001, 0002...
+                
+                let resumoTexto = `*Orçamento de Pintura Nº ${idVisual}*\n\n*Cliente:* ${orc.cliente}\n*Data:* ${orc.data}\n\n*Serviços:*\n`;
                 orc.itens.forEach(i => { resumoTexto += `- ${i.descricao}\n`; });
                 resumoTexto += `\n*Total:* ${orc.total}`;
 
@@ -354,7 +399,7 @@
                     <div class="item-card">
                         <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
                             <strong style="font-size: 1.1rem;">${orc.cliente}</strong>
-                            <span style="color: #6B7280; font-size: 0.8rem;">${orc.data}</span>
+                            <span style="color: #6B7280; font-size: 0.8rem;">#${idVisual} &nbsp;|&nbsp; ${orc.data}</span>
                         </div>
                         <div style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">${orc.total}</div>
                         
@@ -433,9 +478,11 @@
 
             try {
                 const orc = orcamentosSalvos.find(o => o.id === id);
+                
+                // Formata o ID com zeros para o PDF
+                document.getElementById('pdf-id').innerText = String(orc.id).padStart(4, '0');
                 document.getElementById('pdf-cliente-nome').innerText = orc.cliente;
                 document.getElementById('pdf-data').innerText = orc.data;
-                document.getElementById('pdf-id').innerText = orc.id.toString().slice(-6);
                 document.getElementById('pdf-total-valor').innerText = orc.total;
 
                 const tbody = document.getElementById('pdf-tabela-corpo');
@@ -446,8 +493,8 @@
 
                 const elemento = document.getElementById('pdf-template');
                 const opt = {
-                    margin:       [10, 10, 10, 10], 
-                    filename:     `Orcamento_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
+                    margin:       [15, 15, 15, 15], 
+                    filename:     `Orcamento_${String(orc.id).padStart(4, '0')}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { scale: 2, windowWidth: 800 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
