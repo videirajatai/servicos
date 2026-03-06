@@ -8,7 +8,7 @@
     
     <style>
         :root {
-            var(--primary): #1E293B; 
+            --primary: #1E293B; 
             --primary-light: #334155; 
             --primary-gradient: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
             --bg-color: #F3F4F6;
@@ -32,7 +32,7 @@
         .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; }
         label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--primary-light); margin-bottom: 5px; margin-top: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #F9FAFB; outline: none; transition: 0.2s; }
-        input:focus, select:focus { border-color: #1E293B; background: var(--surface); box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1); }
+        input:focus, select:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 2px rgba(30, 41, 59, 0.1); }
         
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
@@ -40,9 +40,9 @@
         button:disabled { opacity: 0.7; cursor: not-allowed; }
         .btn-primary { background: var(--primary-gradient); color: white; box-shadow: 0 4px 6px -1px rgba(30, 41, 59, 0.2); }
         .btn-primary:active { transform: translateY(2px); }
-        .btn-outline { background: transparent; color: #1E293B; border: 2px dashed var(--primary-light); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px dashed var(--primary-light); }
         
-        .btn-header { width: auto; padding: 8px 12px; font-size: 0.9rem; margin-top: 0; background: var(--surface); color: #1E293B; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; }
+        .btn-header { width: auto; padding: 8px 12px; font-size: 0.9rem; margin-top: 0; background: var(--surface); color: var(--primary); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 5px; }
         
         .spin { animation: spinAnim 1s linear infinite; }
         @keyframes spinAnim { 100% { transform: rotate(360deg); } }
@@ -54,54 +54,22 @@
         .header-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--primary-gradient); color: white; font-size: 2rem; box-shadow: 0 4px 10px rgba(30, 41, 59, 0.4); display: flex; align-items: center; justify-content: center; z-index: 100; margin-top: 0; padding: 0; }
         
-        .item-card { border-left: 4px solid #1E293B; padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .item-card { border-left: 4px solid var(--primary); padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .item-card-cliente { border-left-color: var(--text-muted); position: relative; } 
         
-        .btn-edit-cli { position: absolute; top: 15px; right: 15px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; font-size: 1rem; color: #1E293B; }
+        .btn-edit-cli { position: absolute; top: 15px; right: 15px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; font-size: 1rem; color: var(--primary); }
 
         .servico-item { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: #F9FAFB; }
         .btn-remover { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); font-size: 1.5rem; width: auto; padding: 0; margin: 0; }
         
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.03); z-index: 10; border-top: 1px solid var(--border); }
         .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; margin-top: 0; }
-        .nav-item.active { color: #1E293B; font-weight: bold; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
         
-        .total-orcamento { font-size: 1.8rem; text-align: right; color: #1E293B; font-weight: 800; margin-top: 10px; }
+        .total-orcamento { font-size: 1.8rem; text-align: right; color: var(--primary); font-weight: 800; margin-top: 10px; }
 
-        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: #1E293B; font-size: 1.1rem; gap: 15px; }
-        .spinner { width: 45px; height: 45px; border: 4px solid #E5E7EB; border-top: 4px solid #1E293B; border-radius: 50%; animation: spinAnim 1s linear infinite; }
-
-        /* === PDF ESTILO DEFINITIVO (LARGURA FIXA PARA A4) === */
-        #pdf-container { position: absolute; left: -9999px; top: 0; }
-        
-        /* A largura de 800px fixa o tamanho e ignora a tela do celular, forçando preencher a margem */
-        .pdf-layout { width: 800px; padding: 40px; background: white; color: #1F2937; font-family: 'Segoe UI', system-ui, Arial, sans-serif; box-sizing: border-box; }
-        
-        .pdf-title-main { text-align: center; font-size: 2.2rem; color: #1E293B; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; margin: 0 0 20px 0; }
-        
-        .pdf-header-split { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #1E293B; padding-bottom: 20px; margin-bottom: 25px; }
-        
-        .pdf-header-left { text-align: left; }
-        .pdf-header-left h2 { font-size: 1.2rem; color: #374151; margin: 0 0 5px 0; font-weight: bold; }
-        .pdf-header-left p { color: #4B5563; font-size: 0.95rem; margin: 3px 0; }
-        
-        .pdf-logo-box { width: 150px; height: 80px; background: #F3F4F6; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9CA3AF; text-align: center; border-radius: 8px; }
-
-        .pdf-info-grid { display: flex; justify-content: space-between; background: #F9FAFB; padding: 20px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 25px; }
-        .pdf-info-col { display: flex; flex-direction: column; gap: 5px; }
-        .pdf-info-col strong { color: #1E293B; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .pdf-info-col span { color: #4B5563; font-size: 1.1rem; }
-        
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-        .pdf-table th { background: #1E293B; color: white; padding: 12px; text-align: left; font-size: 0.9rem; text-transform: uppercase; }
-        .pdf-table th:not(:first-child), .pdf-table td:not(:first-child) { text-align: center; } 
-        .pdf-table td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.95rem; color: #374151; }
-        .pdf-table tr:nth-child(even) { background-color: #F9FAFB; } 
-        
-        .pdf-total-box { display: flex; justify-content: flex-end; align-items: center; padding: 15px 20px; background: #F3F4F6; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 1.4rem; color: #1F2937; }
-        .pdf-total-box span { font-weight: bold; color: #1E293B; margin-left: 15px; }
-        
-        .pdf-footer { margin-top: 40px; text-align: center; font-size: 0.85rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px; }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 999; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 1.1rem; gap: 15px; }
+        .spinner { width: 45px; height: 45px; border: 4px solid #E5E7EB; border-top: 4px solid var(--primary); border-radius: 50%; animation: spinAnim 1s linear infinite; }
     </style>
 </head>
 <body>
@@ -182,46 +150,7 @@
         <button class="nav-item" onclick="mudarAba('cliente', this)"><span class="nav-icon" style="font-size:1.3rem;">👥</span> Clientes</button>
     </nav>
 
-    <div id="pdf-container">
-        <div id="pdf-template" class="pdf-layout">
-            
-            <div class="pdf-title-main">THIAGO PINTOR</div>
-            
-            <div class="pdf-header-split">
-                <div class="pdf-header-left">
-                    <h2>Thiago Pereira da Silva</h2>
-                    <p>CPF: 005.552.121-57</p>
-                    <p>📞 (64) 99904-6567 / (64) 99908-8480</p>
-                </div>
-                <div class="pdf-logo-box">Logo <br>Empresa</div>
-            </div>
-
-            <div class="pdf-info-grid">
-                <div class="pdf-info-col">
-                    <strong>Cliente / Obra</strong><span id="pdf-cliente-nome"></span>
-                </div>
-                <div class="pdf-info-col" style="text-align: right;">
-                    <strong>Orçamento Nº</strong><span id="pdf-id" style="font-weight: bold; color: #1E293B;"></span>
-                    <strong style="margin-top: 5px;">Data</strong><span id="pdf-data"></span>
-                </div>
-            </div>
-            
-            <table class="pdf-table">
-                <thead><tr><th>Descrição do Serviço</th><th>Medida/Qtd</th><th>V. Unitário</th><th>Subtotal</th></tr></thead>
-                <tbody id="pdf-tabela-corpo"></tbody>
-            </table>
-            
-            <div class="pdf-total-box">Valor Total: <span id="pdf-total-valor"></span></div>
-            
-            <div class="pdf-footer">
-                <p>Orçamento válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo.</p>
-                <p><strong>Agradecemos a preferência!</strong></p>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // MANTENHA A SUA URL AQUI
         const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
 
         let dadosClientes = [];
@@ -476,7 +405,6 @@
             });
         }
 
-        // --- LÓGICA DE SERVIÇOS (M² vs Unidade) ---
         function adicionarServico() {
             const lista = document.getElementById('lista-servicos');
             const item = document.createElement('div');
@@ -529,54 +457,104 @@
             document.getElementById('totalDisplay').innerText = totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // --- COMPARTILHAMENTOS ---
-        function abrirWhatsApp(textoCodificado) {
-            window.open(`https://wa.me/?text=${textoCodificado}`, '_blank');
-        }
+        function abrirWhatsApp(textoCodificado) { window.open(`https://wa.me/?text=${textoCodificado}`, '_blank'); }
 
+        // A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
         async function gerarECompartilharPDF(id, btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '⏳ Gerando...'; btnElement.disabled = true;
 
             try {
                 const orc = orcamentosSalvos.find(o => o.id === id);
-                document.getElementById('pdf-id').innerText = String(orc.id).padStart(4, '0');
-                document.getElementById('pdf-cliente-nome').innerText = orc.cliente;
-                document.getElementById('pdf-data').innerText = orc.data;
-                document.getElementById('pdf-total-valor').innerText = orc.total;
+                const idFormatado = String(orc.id).padStart(4, '0');
 
-                const tbody = document.getElementById('pdf-tabela-corpo');
-                tbody.innerHTML = '';
-                orc.itens.forEach(item => {
-                    tbody.innerHTML += `<tr><td>${item.descricao}</td><td>${item.medida}</td><td>${item.unitario}</td><td><strong>${item.subtotal}</strong></td></tr>`;
-                });
+                // Prepara as linhas da tabela
+                const itemsHtml = orc.itens.map(i => {
+                    return `
+                    <tr>
+                        <td style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151;">${i.descricao}</td>
+                        <td align="center" style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151;">${i.medida}</td>
+                        <td align="center" style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151;">${i.unitario}</td>
+                        <td align="center" style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151; font-weight: bold;">${i.subtotal}</td>
+                    </tr>`;
+                }).join('');
 
-                const elemento = document.getElementById('pdf-template');
+                // A ESTRUTURA BLINDADA COM TABELAS (A mesma técnica do RV Blocos)
+                const htmlParaO_PDF = `
+                <div style="font-family: Arial, sans-serif; padding: 30px; background: white; width: 800px; box-sizing: border-box;">
+                    
+                    <div style="text-align: center; border-bottom: 3px solid #1E293B; padding-bottom: 20px; margin-bottom: 25px;">
+                        <h1 style="color: #1E293B; font-size: 28px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">THIAGO PINTOR</h1>
+                        <h2 style="font-size: 16px; color: #374151; margin: 5px 0 0 0; font-weight: 600;">Thiago Pereira da Silva &nbsp;|&nbsp; CPF: 005.552.121-57</h2>
+                        <p style="color: #6B7280; font-size: 14px; margin: 5px 0 0 0;">📞 (64) 99904-6567 / (64) 99908-8480</p>
+                    </div>
+
+                    <table width="100%" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; margin-bottom: 25px; padding: 15px;">
+                        <tr>
+                            <td width="50%" valign="top" style="padding: 5px;">
+                                <strong style="color: #1E293B; font-size: 12px; text-transform: uppercase;">Cliente / Obra</strong><br>
+                                <span style="color: #4B5563; font-size: 18px; display: inline-block; margin-top: 5px;">${orc.cliente}</span>
+                            </td>
+                            <td width="50%" align="right" valign="top" style="padding: 5px;">
+                                <strong style="color: #1E293B; font-size: 12px; text-transform: uppercase;">Orçamento Nº</strong>
+                                <span style="font-weight: bold; color: #1E293B; font-size: 18px; margin-left: 5px;">${idFormatado}</span><br>
+                                <strong style="color: #1E293B; font-size: 12px; text-transform: uppercase; margin-top: 10px; display: inline-block;">Data</strong>
+                                <span style="color: #4B5563; font-size: 16px; margin-left: 5px;">${orc.data}</span>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table width="100%" style="border-collapse: collapse; margin-bottom: 25px;">
+                        <thead>
+                            <tr style="background: #1E293B; color: white;">
+                                <th align="left" style="padding: 12px; font-size: 13px; text-transform: uppercase;">Descrição do Serviço</th>
+                                <th align="center" style="padding: 12px; font-size: 13px; text-transform: uppercase;">Medida/Qtd</th>
+                                <th align="center" style="padding: 12px; font-size: 13px; text-transform: uppercase;">V. Unitário</th>
+                                <th align="center" style="padding: 12px; font-size: 13px; text-transform: uppercase;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+
+                    <div style="text-align: right; padding: 15px 20px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 20px; color: #1F2937;">
+                        Valor Total: <strong style="color: #1E293B; margin-left: 15px;">${orc.total}</strong>
+                    </div>
+
+                    <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px;">
+                        <p style="margin: 0 0 5px 0;">Orçamento válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo.</p>
+                        <p style="margin: 0;"><strong>Agradecemos a preferência!</strong></p>
+                    </div>
+                </div>`;
+
+                const container = document.createElement('div');
+                container.innerHTML = htmlParaO_PDF;
+
                 const opt = {
                     margin:       [10, 10, 10, 10], 
-                    filename:     `Orcamento_${String(orc.id).padStart(4, '0')}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
+                    filename:     `Orcamento_${idFormatado}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    // html2canvas width lock to match CSS
-                    html2canvas:  { scale: 2, windowWidth: 800, width: 800 }, 
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                const pdfBlob = await html2pdf().set(opt).from(elemento).output('blob');
+                const pdfBlob = await html2pdf().set(opt).from(container).output('blob');
                 const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
 
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({ files: [file], title: 'Orçamento PDF', text: `Orçamento de Pintura para ${orc.cliente}` });
                 } else {
-                    html2pdf().set(opt).from(elemento).save();
+                    html2pdf().set(opt).from(container).save();
                 }
             } catch (error) {
                 alert("Houve um erro ao gerar o PDF.");
+                console.error(error);
             } finally {
                 btnElement.innerHTML = originalText; btnElement.disabled = false;
             }
         }
 
-        // INICIALIZAÇÃO
         window.onload = () => carregarDadosDoGAS(null);
     </script>
 </body>
