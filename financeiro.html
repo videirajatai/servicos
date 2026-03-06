@@ -6,7 +6,6 @@
     <title>Financeiro - Thiago Pintor</title>
     
     <style>
-        /* A MESMA BASE VISUAL DO SEU APP */
         :root {
             --primary: #1E293B; 
             --primary-light: #334155; 
@@ -16,19 +15,18 @@
             --text-main: #111827;
             --text-muted: #6B7280;
             --border: #E5E7EB;
-            --success: #10B981; /* Verde Receita */
-            --danger: #EF4444;  /* Vermelho Despesa */
+            --success: #10B981; 
+            --danger: #EF4444;  
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, Arial, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 90px; }
 
-        header { background: var(--primary-gradient); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 10; letter-spacing: 0.5px; }
+        header { background: var(--primary-gradient); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 10; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center;}
 
         .container { padding: 15px; }
         .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 15px; }
         
-        /* DASHBOARD */
         .dash-saldo { text-align: center; margin-bottom: 15px; }
         .dash-saldo p { color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
         .dash-saldo h2 { font-size: 2.5rem; color: var(--primary); letter-spacing: -1px; margin: 0; }
@@ -39,36 +37,35 @@
         .dash-col h4.val-entrada { color: var(--success); font-size: 1.2rem; margin: 0;}
         .dash-col h4.val-saida { color: var(--danger); font-size: 1.2rem; margin: 0;}
         
-        /* FILTROS */
         .filtro-box { display: flex; gap: 10px; align-items: center; background: var(--surface); padding: 10px 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .filtro-box input[type="date"] { border: 1px solid var(--border); border-radius: 6px; padding: 8px; font-size: 0.85rem; flex: 1; outline: none; background: #F9FAFB; color: var(--text-main); font-weight: bold; }
         .filtro-box span { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; }
 
-        /* TOGGLE HISTÓRICO */
         .toggle-historico { display: flex; background: #E5E7EB; border-radius: 8px; overflow: hidden; margin-bottom: 15px; }
         .toggle-btn { flex: 1; padding: 12px; border: none; background: transparent; font-weight: bold; color: var(--text-muted); cursor: pointer; transition: 0.2s; font-size: 0.9rem; }
         .toggle-btn.active-entrada { background: var(--success); color: white; }
         .toggle-btn.active-saida { background: var(--danger); color: white; }
 
-        /* LISTA DE HISTÓRICO */
         .historico-lista { display: none; }
         .historico-lista.active { display: block; }
         
         .lancamento-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #F3F4F6; }
         .lancamento-item:last-child { border-bottom: none; }
+        .lanc-info { flex: 1; }
         .lanc-info h4 { font-size: 0.95rem; margin: 0 0 3px 0; color: var(--text-main); }
         .lanc-info p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+        .lanc-direita { display: flex; align-items: center; gap: 10px; }
         .lanc-valor { font-weight: 800; font-size: 1.1rem; }
+        .btn-excluir-lanc { background: #FEE2E2; color: var(--danger); border: none; border-radius: 6px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; }
+
         .text-green { color: var(--success); }
         .text-red { color: var(--danger); }
 
-        /* FAB - BOTÕES FLUTUANTES */
         .fab-container { position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100; }
         .fab { width: 54px; height: 54px; border-radius: 27px; color: white; font-size: 1.8rem; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; padding-bottom: 4px; }
         .fab-entrada { background: var(--success); }
         .fab-saida { background: var(--danger); }
 
-        /* MODAL DE CADASTRO */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: flex-end; }
         .modal-content { background: var(--surface); width: 100%; border-radius: 20px 20px 0 0; padding: 25px; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -81,43 +78,55 @@
         input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: #F9FAFB; outline: none; }
         input:focus, select:focus { border-color: var(--primary); background: var(--surface); }
         
-        .btn-salvar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; color: white; margin-top: 20px; }
+        .btn-salvar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; color: white; margin-top: 20px; cursor: pointer;}
         .btn-salvar.bg-green { background: var(--success); }
         .btn-salvar.bg-red { background: var(--danger); }
 
-        /* BARRA INFERIOR */
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.03); z-index: 10; border-top: 1px solid var(--border); }
         .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; margin-top: 0; cursor: pointer; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
+
+        /* LOADER */
+        #loader { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 1.1rem; gap: 15px; }
+        .spinner { width: 45px; height: 45px; border: 4px solid #E5E7EB; border-top: 4px solid var(--primary); border-radius: 50%; animation: spinAnim 1s linear infinite; }
+        @keyframes spinAnim { 100% { transform: rotate(360deg); } }
+        .btn-header { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;}
     </style>
 </head>
 <body>
 
-    <header id="header-title">Financeiro</header>
+    <div id="loader">
+        <div class="spinner"></div>
+        <span id="loader-text">Carregando Financeiro...</span>
+    </div>
+
+    <header id="header-title">
+        <div style="width: 70px;"></div> Financeiro
+        <button class="btn-header" onclick="carregarDadosDoGAS()">🔄 Atualizar</button>
+    </header>
 
     <div class="container">
-        
         <div class="card">
             <div class="dash-saldo">
                 <p>Resultado do Período</p>
-                <h2>R$ 4.500,00</h2>
+                <h2 id="dash-total">R$ 0,00</h2>
             </div>
             <div class="dash-resumo">
                 <div class="dash-col" style="border-right: 1px solid var(--border);">
                     <p>Entradas</p>
-                    <h4 class="val-entrada">⬆ R$ 5.800,00</h4>
+                    <h4 class="val-entrada" id="dash-entradas">⬆ R$ 0,00</h4>
                 </div>
                 <div class="dash-col">
                     <p>Saídas</p>
-                    <h4 class="val-saida">⬇ R$ 1.300,00</h4>
+                    <h4 class="val-saida" id="dash-saidas">⬇ R$ 0,00</h4>
                 </div>
             </div>
         </div>
 
         <div class="filtro-box">
-            <input type="date" id="dataInicio">
+            <input type="date" id="dataInicio" onchange="renderizarTela()">
             <span>até</span>
-            <input type="date" id="dataFim">
+            <input type="date" id="dataFim" onchange="renderizarTela()">
         </div>
 
         <div class="toggle-historico">
@@ -127,52 +136,13 @@
 
         <div class="card historico-lista active" id="hist-entradas">
             <h3 style="margin-bottom: 15px; font-size: 1rem; color: var(--primary);">Histórico de Receitas</h3>
-            
-            <div class="lancamento-item">
-                <div class="lanc-info">
-                    <h4>Sinal Casa Sr. João</h4>
-                    <p>06/03/2026 • PIX</p>
-                </div>
-                <div class="lanc-valor text-green">+ R$ 2.000,00</div>
-            </div>
-            
-            <div class="lancamento-item">
-                <div class="lanc-info">
-                    <h4>Finalização Fachada</h4>
-                    <p>01/03/2026 • Dinheiro</p>
-                </div>
-                <div class="lanc-valor text-green">+ R$ 3.800,00</div>
-            </div>
+            <div id="lista-receitas-container"></div>
         </div>
 
         <div class="card historico-lista" id="hist-saidas">
             <h3 style="margin-bottom: 15px; font-size: 1rem; color: var(--primary);">Histórico de Despesas</h3>
-            
-            <div class="lancamento-item">
-                <div class="lanc-info">
-                    <h4>Tintas Suvinil (Madeireira)</h4>
-                    <p>05/03/2026 • Material</p>
-                </div>
-                <div class="lanc-valor text-red">- R$ 850,00</div>
-            </div>
-            
-            <div class="lancamento-item">
-                <div class="lanc-info">
-                    <h4>Gasolina Fiorino</h4>
-                    <p>02/03/2026 • Transporte</p>
-                </div>
-                <div class="lanc-valor text-red">- R$ 150,00</div>
-            </div>
-            
-            <div class="lancamento-item">
-                <div class="lanc-info">
-                    <h4>Almoço Equipe</h4>
-                    <p>02/03/2026 • Alimentação</p>
-                </div>
-                <div class="lanc-valor text-red">- R$ 300,00</div>
-            </div>
+            <div id="lista-despesas-container"></div>
         </div>
-
     </div>
 
     <div class="fab-container">
@@ -205,15 +175,9 @@
 
             <label>Categoria / Forma</label>
             <select id="cat-lanc">
-                <option value="Material">Material</option>
-                <option value="Alimentação">Alimentação</option>
-                <option value="Transporte">Transporte / Combustível</option>
-                <option value="Mão de Obra">Mão de Obra (Ajudante)</option>
-                <option value="Serviço (PIX)">Serviço Prestado (PIX)</option>
-                <option value="Serviço (Dinheiro)">Serviço Prestado (Dinheiro)</option>
-            </select>
+                </select>
 
-            <button class="btn-salvar bg-green" id="btn-salvar-lanc">Salvar Lançamento</button>
+            <button class="btn-salvar bg-green" id="btn-salvar-lanc" onclick="salvarLancamento()">Salvar Lançamento</button>
         </div>
     </div>
 
@@ -221,21 +185,200 @@
         <button class="nav-item" onclick="window.location.href='index.html'">
             <span class="nav-icon" style="font-size:1.3rem;">📝</span> Orçamentos
         </button>        
-        
         <button class="nav-item" onclick="window.location.href='index.html'">
             <span class="nav-icon" style="font-size:1.3rem;">👥</span> Clientes
         </button>
-
         <button class="nav-item active">
             <span class="nav-icon" style="font-size:1.3rem;">💰</span> Financeiro
         </button>
     </nav>
 
     <script>
-        // O GS fica aqui guardadinho SÓ para quando a gente for salvar ou puxar dinheiro da planilha. 
         const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
 
-        // Alterna entre a lista de receitas e despesas
+        let lancamentos = [];
+
+        // --- INICIALIZAÇÃO E DATAS ---
+        window.onload = () => {
+            setarFiltroMesAtual();
+            carregarDadosDoGAS();
+        };
+
+        function setarFiltroMesAtual() {
+            const hoje = new Date();
+            const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+            // Ajusta o fuso horário para bater o dia certo no input date
+            document.getElementById('dataInicio').valueAsDate = new Date(primeiroDia.getTime() - (primeiroDia.getTimezoneOffset() * 60000));
+            document.getElementById('dataFim').valueAsDate = new Date(ultimoDia.getTime() - (ultimoDia.getTimezoneOffset() * 60000));
+        }
+
+        function mostrarLoader(mostrar, texto = "Carregando...") { 
+            const loader = document.getElementById('loader');
+            document.getElementById('loader-text').innerText = texto;
+            loader.style.display = mostrar ? 'flex' : 'none'; 
+        }
+
+        function formatarMoeda(valor) {
+            return parseFloat(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // --- COMUNICAÇÃO COM O GOOGLE SHEETS ---
+        async function carregarDadosDoGAS() {
+            mostrarLoader(true, "Buscando Financeiro...");
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'buscarDados' }) });
+                const res = await response.json();
+                
+                if (res.status === 'sucesso') {
+                    // Mapeia do array do GAS [ID, Tipo, Data, Desc, Valor, Cat] para Objeto JS
+                    lancamentos = res.financeiro.map(L => {
+                        let dataFormatada = L[2];
+                        if (typeof L[2] === 'string' && L[2].includes('T')) {
+                            dataFormatada = L[2].split('T')[0]; // Formato YYYY-MM-DD
+                        }
+                        
+                        return {
+                            id: L[0], tipo: L[1], data: dataFormatada, 
+                            descricao: L[3], valor: parseFloat(L[4]) || 0, categoria: L[5]
+                        };
+                    });
+                    
+                    renderizarTela();
+                }
+            } catch (e) {
+                alert("Erro ao buscar dados do Financeiro.");
+            } finally {
+                mostrarLoader(false);
+            }
+        }
+
+        async function salvarLancamento() {
+            const desc = document.getElementById('desc-lanc').value;
+            const valor = parseFloat(document.getElementById('valor-lanc').value);
+            const dataInput = document.getElementById('data-lanc').value;
+            const cat = document.getElementById('cat-lanc').value;
+            const tipo = document.getElementById('tipo-lancamento').value;
+
+            if(!desc || !valor || isNaN(valor) || !dataInput) {
+                return alert("Preencha Descrição, Valor numérico e Data!");
+            }
+
+            const novoId = new Date().getTime(); // ID Único rápido
+
+            const payload = {
+                action: 'salvarLancamento',
+                id: novoId,
+                tipo: tipo,
+                data: dataInput,
+                descricao: desc,
+                valor: valor,
+                categoria: cat
+            };
+
+            mostrarLoader(true, "Salvando Lançamento...");
+            fecharModal();
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await response.json();
+                if(res.status === 'sucesso') {
+                    carregarDadosDoGAS();
+                } else {
+                    alert('Erro na planilha: ' + res.mensagem);
+                }
+            } catch(e) { alert("Erro de conexão ao salvar."); }
+        }
+
+        async function excluirLancamento(id) {
+            if(!confirm("Deseja realmente apagar este lançamento?")) return;
+            
+            mostrarLoader(true, "Apagando...");
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'excluirLancamento', id: id }) });
+                const res = await response.json();
+                if(res.status === 'sucesso') {
+                    carregarDadosDoGAS();
+                } else {
+                    alert('Erro na exclusão: ' + res.mensagem);
+                }
+            } catch(e) { alert("Erro de conexão."); }
+        }
+
+        // --- RENDERIZAÇÃO DO HTML ---
+        function renderizarTela() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+
+            // Filtra os lançamentos que estão dentro da data selecionada
+            let lancFiltrados = lancamentos.filter(L => {
+                if(!L.data) return false;
+                // Ajuste se a data vier no formato ISO do GAS
+                const dStr = typeof L.data === 'string' && L.data.includes('T') ? L.data.split('T')[0] : L.data;
+                return dStr >= dataInicio && dStr <= dataFim;
+            });
+
+            // Ordena do mais recente para o mais antigo
+            lancFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            let totalEntradas = 0;
+            let totalSaidas = 0;
+            let htmlEntradas = '';
+            let htmlSaidas = '';
+
+            if(lancFiltrados.length === 0) {
+                htmlEntradas = '<p style="text-align:center; color:#6B7280; font-size:0.9rem;">Nenhuma receita no período.</p>';
+                htmlSaidas = '<p style="text-align:center; color:#6B7280; font-size:0.9rem;">Nenhuma despesa no período.</p>';
+            }
+
+            lancFiltrados.forEach(L => {
+                // Ajuste na exibição da data para o usuário
+                let dataDisplay = L.data;
+                if(L.data && L.data.includes('-')) {
+                    const partes = L.data.split('-');
+                    dataDisplay = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
+
+                const itemHtml = `
+                    <div class="lancamento-item">
+                        <div class="lanc-info">
+                            <h4>${L.descricao}</h4>
+                            <p>${dataDisplay} • ${L.categoria}</p>
+                        </div>
+                        <div class="lanc-direita">
+                            <div class="lanc-valor ${L.tipo === 'entrada' ? 'text-green' : 'text-red'}">
+                                ${L.tipo === 'entrada' ? '+' : '-'} ${formatarMoeda(L.valor)}
+                            </div>
+                            <button class="btn-excluir-lanc" onclick="excluirLancamento('${L.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+
+                if (L.tipo === 'entrada') {
+                    totalEntradas += L.valor;
+                    htmlEntradas += itemHtml;
+                } else {
+                    totalSaidas += L.valor;
+                    htmlSaidas += itemHtml;
+                }
+            });
+
+            const saldoGeral = totalEntradas - totalSaidas;
+
+            // Atualiza Dashboard
+            document.getElementById('dash-entradas').innerText = `⬆ ${formatarMoeda(totalEntradas)}`;
+            document.getElementById('dash-saidas').innerText = `⬇ ${formatarMoeda(totalSaidas)}`;
+            
+            const dashTotalEl = document.getElementById('dash-total');
+            dashTotalEl.innerText = formatarMoeda(saldoGeral);
+            dashTotalEl.style.color = saldoGeral < 0 ? 'var(--danger)' : 'var(--primary)';
+
+            // Atualiza Listas
+            document.getElementById('lista-receitas-container').innerHTML = htmlEntradas;
+            document.getElementById('lista-despesas-container').innerHTML = htmlSaidas;
+        }
+
+        // --- CONTROLE DE TELA ---
         function mudarAbaHist(tipo) {
             document.getElementById('hist-entradas').classList.remove('active');
             document.getElementById('hist-saidas').classList.remove('active');
@@ -251,14 +394,15 @@
             }
         }
 
-        // Controle do Modal de Novo Lançamento
         function abrirModalLancamento(tipo) {
             const modal = document.getElementById('modal-lancamento');
             const titulo = document.getElementById('modal-titulo');
             const btnSalvar = document.getElementById('btn-salvar-lanc');
+            const catSelect = document.getElementById('cat-lanc');
             
-            // Seta a data de hoje por padrão
-            document.getElementById('data-lanc').valueAsDate = new Date();
+            // Ajuste do timezone pra preencher a data de hoje certinho no input
+            const hojeLocal = new Date();
+            document.getElementById('data-lanc').valueAsDate = new Date(hojeLocal.getTime() - (hojeLocal.getTimezoneOffset() * 60000));
             
             document.getElementById('tipo-lancamento').value = tipo;
             
@@ -266,10 +410,24 @@
                 titulo.innerText = 'Nova Receita';
                 titulo.style.color = 'var(--success)';
                 btnSalvar.className = 'btn-salvar bg-green';
+                catSelect.innerHTML = `
+                    <option value="Sinal / Entrada">Sinal / Entrada</option>
+                    <option value="Serviço (PIX)">Serviço Prestado (PIX)</option>
+                    <option value="Serviço (Dinheiro)">Serviço Prestado (Dinheiro)</option>
+                    <option value="Outras Receitas">Outras Receitas</option>
+                `;
             } else {
                 titulo.innerText = 'Nova Despesa';
                 titulo.style.color = 'var(--danger)';
                 btnSalvar.className = 'btn-salvar bg-red';
+                catSelect.innerHTML = `
+                    <option value="Material">Material (Tinta, Massa, etc)</option>
+                    <option value="Mão de Obra">Mão de Obra (Ajudante/Terceiro)</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Transporte">Transporte / Combustível</option>
+                    <option value="Manutenção">Ferramentas / Manutenção</option>
+                    <option value="Outros">Outras Despesas</option>
+                `;
             }
             
             modal.style.display = 'flex';
@@ -277,7 +435,6 @@
 
         function fecharModal() {
             document.getElementById('modal-lancamento').style.display = 'none';
-            // Limpar form
             document.getElementById('desc-lanc').value = '';
             document.getElementById('valor-lanc').value = '';
         }
