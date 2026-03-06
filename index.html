@@ -50,6 +50,10 @@
         .acoes-card { display: flex; gap: 10px; margin-top: 15px; }
         .btn-share-text { background: #25D366; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; border-radius: 8px; }
         .btn-share-pdf { background: #EF4444; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; border-radius: 8px; }
+        
+        /* Botões pequenos de ação */
+        .btn-action-small { background: #F3F4F6; border: 1px solid #E5E7EB; color: #1F2937; padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; margin: 0; flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px;}
+        .btn-action-small.delete { color: var(--danger); }
 
         .header-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--primary-gradient); color: white; font-size: 2rem; box-shadow: 0 4px 10px rgba(30, 41, 59, 0.4); display: flex; align-items: center; justify-content: center; z-index: 100; margin-top: 0; padding: 0; }
@@ -60,7 +64,10 @@
         .btn-edit-cli { position: absolute; top: 15px; right: 15px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; font-size: 1rem; color: var(--primary); }
 
         .servico-item { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: #F9FAFB; }
-        .btn-remover { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); font-size: 1.5rem; width: auto; padding: 0; margin: 0; }
+        
+        /* O botão X remodelado */
+        .servico-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 12px; }
+        .btn-remover { background: #FEE2E2; color: var(--danger); border: none; font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; margin: 0; width: auto; }
         
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.03); z-index: 10; border-top: 1px solid var(--border); }
         .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; margin-top: 0; }
@@ -86,7 +93,11 @@
             <div class="header-lista">
                 <h3>Recentes</h3>
                 <button class="btn-header" onclick="carregarDadosDoGAS(this)">
-                    <span class="icon-refresh">🔄</span> Atualizar
+                    <svg class="icon-refresh" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                    Atualizar
                 </button>
             </div>
             <div id="container-lista-orc"></div>
@@ -96,6 +107,8 @@
         <div id="tela-novo-orcamento" style="display: none;">
             <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaListaOrcamentos()">⬅ Voltar</button>
             <div class="card">
+                <h3 id="titulo-form-orcamento" style="margin-bottom: 15px; font-size: 1.2rem; color: var(--primary);">Novo Orçamento</h3>
+                
                 <label>Selecionar Cliente</label>
                 <select id="clienteSelect">
                     <option value="Consumidor Final">Consumidor Final</option>
@@ -109,6 +122,10 @@
                     <label>Total do Orçamento</label>
                     <div class="total-orcamento" id="totalDisplay">R$ 0,00</div>
                 </div>
+                
+                <input type="hidden" id="orcamentoIdEditando">
+                <input type="hidden" id="orcamentoDataEditando">
+
                 <button class="btn-primary" id="btnSalvarOrc" onclick="salvarOrcamentoNoGAS()">💾 Salvar na Planilha</button>
             </div>
         </div>
@@ -119,7 +136,11 @@
             <div class="header-lista">
                 <h3>Clientes Cadastrados</h3>
                 <button class="btn-header" onclick="carregarDadosDoGAS(this)">
-                    <span class="icon-refresh">🔄</span> Atualizar
+                    <svg class="icon-refresh" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                    Atualizar
                 </button>
             </div>
             <div id="container-lista-cli"></div>
@@ -151,6 +172,7 @@
     </nav>
 
     <script>
+        // MANTENHA A SUA URL AQUI NO LUGAR DESTA!
         const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
 
         let dadosClientes = [];
@@ -172,10 +194,17 @@
             document.getElementById('header-title').innerText = titulos[abaId];
         }
 
+        // --- CONTROLE ORÇAMENTOS ---
         function abrirNovoOrcamento() {
+            document.getElementById('titulo-form-orcamento').innerText = "Novo Orçamento";
+            document.getElementById('orcamentoIdEditando').value = "";
+            document.getElementById('orcamentoDataEditando').value = "";
+            document.getElementById('lista-servicos').innerHTML = "";
+            document.getElementById('totalDisplay').innerText = "R$ 0,00";
+            
             document.getElementById('tela-lista-orcamentos').style.display = 'none';
             document.getElementById('tela-novo-orcamento').style.display = 'block';
-            if(document.getElementById('lista-servicos').children.length === 0) adicionarServico();
+            adicionarServico();
         }
 
         function voltarParaListaOrcamentos() {
@@ -183,6 +212,7 @@
             document.getElementById('tela-lista-orcamentos').style.display = 'block';
         }
 
+        // --- CONTROLE CLIENTES ---
         function abrirNovoCliente() {
             document.getElementById('titulo-form-cliente').innerText = "Novo Cliente";
             document.getElementById('cliNomeOriginal').value = "";
@@ -262,7 +292,6 @@
         async function salvarOuEditarClienteNoGAS() {
             const nome = document.getElementById('cliNome').value;
             const nomeOriginal = document.getElementById('cliNomeOriginal').value; 
-            
             if(!nome) return alert('O nome é obrigatório!');
             
             const payload = {
@@ -282,9 +311,9 @@
                     voltarParaListaClientes();
                     carregarDadosDoGAS();
                 } else {
-                    alert('Erro reportado pela planilha: ' + res.mensagem);
+                    alert('Erro na planilha: ' + res.mensagem);
                 }
-            } catch(e) { alert("Erro de conexão ao salvar."); }
+            } catch(e) { alert("Erro de conexão."); }
             mostrarLoader(false);
         }
 
@@ -316,17 +345,23 @@
 
             if(itensArray.length === 0) return alert('Adicione pelo menos um serviço com valor.');
 
+            let idEditando = document.getElementById('orcamentoIdEditando').value;
+            let dataOriginal = document.getElementById('orcamentoDataEditando').value;
+            
             let novoId = 1;
-            if (orcamentosSalvos.length > 0) {
+            if (idEditando) {
+                novoId = parseInt(idEditando);
+            } else if (orcamentosSalvos.length > 0) {
                 const ids = orcamentosSalvos.map(orc => parseInt(orc.id) || 0);
                 novoId = Math.max(...ids) + 1;
             }
 
             const dataHoje = new Date();
-            const dataStr = `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
+            const dataStr = dataOriginal || `${String(dataHoje.getDate()).padStart(2, '0')}/${String(dataHoje.getMonth() + 1).padStart(2, '0')}/${dataHoje.getFullYear()}`;
 
             const payload = {
                 action: 'salvarOrcamento',
+                idOriginal: idEditando ? novoId : null,
                 id: novoId, 
                 data: dataStr,
                 cliente: cliente,
@@ -334,18 +369,78 @@
                 itens: itensArray
             };
 
-            mostrarLoader(true, "Gravando Orçamento...");
+            mostrarLoader(true, idEditando ? "Atualizando Orçamento..." : "Gravando Orçamento...");
             try {
                 const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
                 const res = await response.json();
                 if(res.status === 'sucesso') {
-                    document.getElementById('lista-servicos').innerHTML = '';
-                    document.getElementById('totalDisplay').innerText = 'R$ 0,00';
                     voltarParaListaOrcamentos();
                     carregarDadosDoGAS();
                 }
-            } catch(e) { alert("Erro de conexão ao salvar orçamento."); }
+            } catch(e) { alert("Erro de conexão ao salvar."); }
             mostrarLoader(false);
+        }
+
+        async function excluirOrcamento(id) {
+            if(!confirm("Tem certeza que deseja apagar este Orçamento?")) return;
+            mostrarLoader(true, "Apagando Orçamento...");
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'excluirOrcamento', id: id }) });
+                const res = await response.json();
+                if(res.status === 'sucesso') {
+                    carregarDadosDoGAS();
+                } else {
+                    alert('Erro na exclusão: ' + res.mensagem);
+                }
+            } catch(e) { alert("Erro de conexão ao excluir."); }
+            mostrarLoader(false);
+        }
+
+        // Função útil para voltar os valores (R$) para número na hora de editar
+        function parseMoedaBR(str) {
+            if(!str) return 0;
+            return parseFloat(str.replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        function prepararEdicaoOrcamento(id) {
+            const orc = orcamentosSalvos.find(o => o.id === id);
+            if(!orc) return;
+
+            document.getElementById('titulo-form-orcamento').innerText = "Editar Orçamento #" + String(orc.id).padStart(4, '0');
+            document.getElementById('orcamentoIdEditando').value = orc.id;
+            document.getElementById('orcamentoDataEditando').value = orc.data;
+            document.getElementById('clienteSelect').value = orc.cliente;
+            
+            const lista = document.getElementById('lista-servicos');
+            lista.innerHTML = ''; // Limpa os serviços para colocar os do BD
+
+            orc.itens.forEach(item => {
+                adicionarServico();
+                const nodeLinha = lista.lastElementChild;
+                nodeLinha.querySelector('.desc-servico').value = item.descricao;
+                
+                const valorUn = parseMoedaBR(item.unitario);
+
+                if (item.medida.includes('un')) {
+                    nodeLinha.querySelector('.tipo-cobranca').value = 'unidade';
+                    alternarModoCalculo(nodeLinha.querySelector('.tipo-cobranca'));
+                    nodeLinha.querySelector('.qtd-servico').value = parseInt(item.medida) || 1;
+                    nodeLinha.querySelector('.valor-unit').value = valorUn;
+                } else {
+                    nodeLinha.querySelector('.tipo-cobranca').value = 'm2';
+                    alternarModoCalculo(nodeLinha.querySelector('.tipo-cobranca'));
+                    // Quando é m2 a gente salva só a área final, então na hora de editar colocamos a área na largura e 1 na altura
+                    const areaLida = parseFloat(item.medida) || 0;
+                    nodeLinha.querySelector('.largura-m2').value = areaLida;
+                    nodeLinha.querySelector('.altura-m2').value = 1;
+                    nodeLinha.querySelector('.valor-m2').value = valorUn;
+                }
+            });
+
+            calcularTotal();
+            
+            document.getElementById('tela-lista-orcamentos').style.display = 'none';
+            document.getElementById('tela-novo-orcamento').style.display = 'block';
         }
 
         // --- RENDERIZADORES DE TELA ---
@@ -396,7 +491,12 @@
                         </div>
                         <div style="color: var(--primary); font-weight: 800; font-size: 1.3rem; margin: 10px 0;">${orc.total}</div>
                         
-                        <div class="acoes-card">
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button class="btn-action-small" onclick="prepararEdicaoOrcamento(${orc.id})">✏️ Editar</button>
+                            <button class="btn-action-small delete" onclick="excluirOrcamento(${orc.id})">🗑️ Excluir</button>
+                        </div>
+
+                        <div class="acoes-card" style="margin-top: 10px;">
                             <button class="btn-share-text" onclick="abrirWhatsApp('${encodeURIComponent(resumoTexto)}')">💬 WhatsApp</button>
                             <button class="btn-share-pdf" onclick="gerarECompartilharPDF(${orc.id}, this)">📄 PDF</button>
                         </div>
@@ -410,12 +510,15 @@
             const item = document.createElement('div');
             item.className = 'servico-item';
             item.innerHTML = `
-                <button class="btn-remover" onclick="removerServico(this)">&times;</button>
+                <div class="servico-header">
+                    <strong style="color: #6B7280; font-size: 0.8rem; text-transform: uppercase;">Detalhes do Serviço</strong>
+                    <button class="btn-remover" onclick="removerServico(this)">X Remover</button>
+                </div>
                 <select class="tipo-cobranca" style="margin-bottom:10px;" onchange="alternarModoCalculo(this)">
                     <option value="unidade">Cobrar por Fixo / Unidade</option>
                     <option value="m2">Cobrar por Metro Quadrado (m²)</option>
                 </select>
-                <label>Descrição do Serviço</label>
+                <label style="margin-top: 5px;">Descrição do Serviço</label>
                 <input type="text" class="desc-servico" placeholder="Ex: Pintura Externa Texturizada">
                 <div class="bloco-unidade row-2" style="margin-top:10px;">
                     <div><label>Quantidade</label><input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()"></div>
@@ -459,9 +562,7 @@
 
         function abrirWhatsApp(textoCodificado) { window.open(`https://wa.me/?text=${textoCodificado}`, '_blank'); }
 
-        // A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
-// A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
-// A MÁGICA DO PDF (PENSANDO FORA DA CAIXA - ESTRUTURA 100% RV BLOCOS)
+        // A MÁGICA DO PDF (PENSANDO FORA DA CAIXA - ESTRUTURA 100% FLUIDA)
         async function gerarECompartilharPDF(id, btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '⏳ Gerando...'; btnElement.disabled = true;
@@ -470,7 +571,6 @@
                 const orc = orcamentosSalvos.find(o => o.id === id);
                 const idFormatado = String(orc.id).padStart(4, '0');
 
-                // Prepara as linhas
                 const itemsHtml = orc.itens.map(i => {
                     return `
                     <tr>
@@ -481,7 +581,6 @@
                     </tr>`;
                 }).join('');
 
-                // ESTRUTURA PURA DE TABELAS (100% FLUIDO PARA A4)
                 const htmlParaO_PDF = `
                 <div style="font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px; background: white; box-sizing: border-box;">
 
@@ -557,7 +656,6 @@
                 const container = document.createElement('div');
                 container.innerHTML = htmlParaO_PDF;
 
-                // OPÇÕES LIMPAS (O html2pdf vai cuidar do tamanho A4 sozinho)
                 const opt = {
                     margin:       [10, 10, 10, 10], 
                     filename:     `Orcamento_${idFormatado}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
