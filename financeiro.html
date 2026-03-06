@@ -226,7 +226,7 @@
 
         // --- COMUNICAÇÃO COM O GOOGLE SHEETS ---
         async function carregarDadosDoGAS() {
-            mostrarLoader(true, "Buscando Financeiro...");
+            mostrarLoader(true, "Carregando...");
             try {
                 const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'buscarDados' }) });
                 const res = await response.json();
