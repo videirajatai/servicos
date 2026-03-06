@@ -19,7 +19,6 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
 
         header { background: var(--primary); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 10; }
@@ -36,11 +35,11 @@
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 15px; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-outline { background: transparent; color: var(--primary); border: 2px dashed var(--primary); }
         .btn-header { width: auto; padding: 8px 12px; font-size: 0.9rem; margin-top: 0; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
         
-        /* Botões de Ação no Card */
         .acoes-card { display: flex; gap: 10px; margin-top: 15px; }
         .btn-share-text { background: #25D366; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; }
         .btn-share-pdf { background: #EF4444; color: white; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.9rem; margin-top: 0; }
@@ -59,9 +58,12 @@
         
         .total-orcamento { font-size: 1.5rem; text-align: right; color: var(--primary); font-weight: bold; margin-top: 10px; }
 
-        /* Estilos específicos para o layout do PDF (invisível na tela principal) */
+        /* Loader */
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 999; justify-content: center; align-items: center; font-weight: bold; color: var(--primary); font-size: 1.2rem; }
+
+        /* PDF CSS - Ajustado para evitar cortes na lateral */
         #pdf-container { position: absolute; left: -9999px; top: 0; }
-        .pdf-layout { width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif; }
+        .pdf-layout { width: 100%; max-width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif; box-sizing: border-box; }
         .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1F2937; padding-bottom: 20px; margin-bottom: 20px; }
         .pdf-logo-box { width: 150px; height: 80px; background: #F3F4F6; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9CA3AF; text-align: center; }
         .pdf-company-info { text-align: right; }
@@ -69,116 +71,109 @@
         .pdf-company-info p { margin: 5px 0 0 0; color: #4B5563; font-size: 0.9rem; }
         .pdf-client-box { background: #F9FAFB; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #E5E7EB; }
         .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .pdf-table th { background: #1F2937; color: white; padding: 12px; text-align: left; font-size: 0.9rem; }
-        .pdf-table td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.9rem; }
+        .pdf-table th { background: #1F2937; color: white; padding: 12px; text-align: left; font-size: 0.9rem; border: 1px solid #1F2937; }
+        .pdf-table td { padding: 12px; border-bottom: 1px solid #E5E7EB; font-size: 0.9rem; border-left: 1px solid #E5E7EB; border-right: 1px solid #E5E7EB; }
         .pdf-total-box { text-align: right; padding: 20px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB; font-size: 1.2rem; }
         .pdf-footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px; }
     </style>
 </head>
 <body>
 
+    <div id="loader">Sincronizando com a Planilha...</div>
     <header id="header-title">Orçamentos</header>
 
     <main id="view-orcamento" class="view active">
-        
         <div id="tela-lista-orcamentos">
             <div class="header-lista">
                 <h3>Recentes</h3>
-                <button class="btn-header" onclick="carregarListaOrcamentos()">🔄 Atualizar</button>
+                <button class="btn-header" onclick="carregarDadosDoGAS()">🔄 Atualizar</button>
             </div>
-            
-            <div id="container-lista"></div>
-
+            <div id="container-lista-orc"></div>
             <button class="fab" onclick="abrirNovoOrcamento()">+</button>
         </div>
 
         <div id="tela-novo-orcamento" style="display: none;">
             <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaLista()">⬅ Voltar</button>
-            
             <div class="card">
-                <label>Cliente / Obra</label>
-                <input type="text" id="nomeCliente" placeholder="Ex: Casa do João - Fachada">
+                <label>Selecionar Cliente</label>
+                <select id="clienteSelect">
+                    <option value="Consumidor Final">Consumidor Final</option>
+                    </select>
                 
                 <h3 style="margin-top: 25px; font-size: 1.1rem;">Serviços</h3>
                 <div id="lista-servicos"></div>
-                
                 <button class="btn-outline" onclick="adicionarServico()">+ Adicionar Serviço</button>
                 
                 <div style="margin-top: 20px; border-top: 1px solid #E5E7EB; padding-top: 15px;">
                     <label>Total do Orçamento</label>
                     <div class="total-orcamento" id="totalDisplay">R$ 0,00</div>
                 </div>
-
-                <button class="btn-primary" onclick="salvarOrcamento()">💾 Salvar Orçamento</button>
+                <button class="btn-primary" id="btnSalvarOrc" onclick="salvarOrcamentoNoGAS()">💾 Salvar na Planilha</button>
             </div>
         </div>
-
     </main>
 
-    <main id="view-financeiro" class="view">
-        <div class="card"><p>Módulo Financeiro em desenvolvimento...</p></div>
+    <main id="view-cliente" class="view">
+        <div class="card">
+            <h3 style="margin-bottom: 10px;">Cadastrar Novo Cliente</h3>
+            <label>Nome Completo</label><input type="text" id="cliNome" placeholder="Ex: João da Silva">
+            <label>CPF / CNPJ</label><input type="text" id="cliCpf" placeholder="Apenas números">
+            <label>Telefone</label><input type="text" id="cliTel" placeholder="(00) 00000-0000">
+            <label>Endereço Completo</label><input type="text" id="cliEnd" placeholder="Rua, Número, Bairro">
+            <button class="btn-primary" id="btnSalvarCli" onclick="salvarClienteNoGAS()">💾 Salvar Cliente</button>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Clientes Cadastrados</h3>
+            <div id="container-lista-cli"></div>
+        </div>
     </main>
+
+    <main id="view-financeiro" class="view"><div class="card"><p>Em desenvolvimento...</p></div></main>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="mudarAba('orcamento', this)">
-            <span class="nav-icon">📝</span> Orçamentos
-        </button>
-        <button class="nav-item" onclick="mudarAba('financeiro', this)">
-            <span class="nav-icon">💰</span> Financeiro
-        </button>
-        <button class="nav-item" onclick="mudarAba('cliente', this)">
-            <span class="nav-icon">👥</span> Clientes
-        </button>
+        <button class="nav-item active" onclick="mudarAba('orcamento', this)"><span class="nav-icon">📝</span> Orçamentos</button>
+        <button class="nav-item" onclick="mudarAba('financeiro', this)"><span class="nav-icon">💰</span> Financeiro</button>
+        <button class="nav-item" onclick="mudarAba('cliente', this)"><span class="nav-icon">👥</span> Clientes</button>
     </nav>
 
     <div id="pdf-container">
         <div id="pdf-template" class="pdf-layout">
             <div class="pdf-header">
-                <div class="pdf-logo-box">Sua Logo<br>Aqui</div>
+                <div class="pdf-logo-box">Logo <br>Empresa</div>
                 <div class="pdf-company-info">
                     <h1>ORÇAMENTO</h1>
                     <p>Pinturas & Reformas Profissionais</p>
-                    <p>WhatsApp: (00) 00000-0000</p>
                 </div>
             </div>
-            
             <div class="pdf-client-box">
                 <strong>Cliente / Obra:</strong> <span id="pdf-cliente-nome"></span><br>
                 <strong>Data:</strong> <span id="pdf-data"></span><br>
                 <strong>Orçamento Nº:</strong> <span id="pdf-id"></span>
             </div>
-
             <table class="pdf-table">
-                <thead>
-                    <tr>
-                        <th>Descrição do Serviço</th>
-                        <th>Medida / Qtd</th>
-                        <th>V. Unitário</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody id="pdf-tabela-corpo">
-                    </tbody>
+                <thead><tr><th>Descrição</th><th>Medida/Qtd</th><th>V. Unitário</th><th>Subtotal</th></tr></thead>
+                <tbody id="pdf-tabela-corpo"></tbody>
             </table>
-
-            <div class="pdf-total-box">
-                <strong>Valor Total: <span id="pdf-total-valor"></span></strong>
-            </div>
-
-            <div class="pdf-footer">
-                <p>Orçamento válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo do projeto.</p>
-                <p>Agradecemos a preferência!</p>
-            </div>
+            <div class="pdf-total-box"><strong>Valor Total: <span id="pdf-total-valor"></span></strong></div>
+            <div class="pdf-footer"><p>Orçamento válido por 15 dias.</p><p>Agradecemos a preferência!</p></div>
         </div>
     </div>
 
     <script>
-        // --- NAVEGAÇÃO ---
+        // === COLOQUE AQUI A NOVA URL DO SEU GOOGLE APPS SCRIPT ===
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
+
+        let dadosClientes = [];
+        let orcamentosSalvos = [];
+
+        // --- NAVEGAÇÃO E UI ---
+        function mostrarLoader(mostrar) { document.getElementById('loader').style.display = mostrar ? 'flex' : 'none'; }
+
         function mudarAba(abaId, elementoBtn) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            let abaParaMostrar = document.getElementById('view-' + abaId);
-            if(abaParaMostrar) abaParaMostrar.classList.add('active');
+            document.getElementById('view-' + abaId).classList.add('active');
             elementoBtn.classList.add('active');
             const titulos = { 'orcamento': 'Orçamentos', 'financeiro': 'Financeiro', 'cliente': 'Clientes' };
             document.getElementById('header-title').innerText = titulos[abaId];
@@ -195,12 +190,165 @@
             document.getElementById('tela-lista-orcamentos').style.display = 'block';
         }
 
+        // --- COMUNICAÇÃO COM GAS (PLANILHA) ---
+        async function carregarDadosDoGAS() {
+            mostrarLoader(true);
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'buscarDados' }) });
+                const res = await response.json();
+                
+                if (res.status === 'sucesso') {
+                    // Mapeia Clientes
+                    dadosClientes = res.clientes.map(c => ({ nome: c[0], cpf: c[1], tel: c[2], end: c[3] }));
+                    atualizarSelectClientes();
+                    renderizarListaClientes();
+
+                    // Mapeia Orçamentos (Lê de trás pra frente para os mais novos ficarem no topo)
+                    orcamentosSalvos = res.orcamentos.map(o => ({
+                        id: o[0], data: o[1], cliente: o[2], total: o[3], itens: JSON.parse(o[4] || '[]')
+                    })).reverse();
+                    renderizarListaOrcamentos();
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao buscar dados. Verifique o link do GAS.");
+            }
+            mostrarLoader(false);
+        }
+
+        async function salvarClienteNoGAS() {
+            const nome = document.getElementById('cliNome').value;
+            if(!nome) return alert('O nome é obrigatório!');
+            
+            const payload = {
+                action: 'salvarCliente',
+                nome: nome,
+                cpf: document.getElementById('cliCpf').value,
+                telefone: document.getElementById('cliTel').value,
+                endereco: document.getElementById('cliEnd').value
+            };
+
+            mostrarLoader(true);
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await response.json();
+                if(res.status === 'sucesso') {
+                    alert('Cliente salvo na planilha!');
+                    document.getElementById('cliNome').value = ''; document.getElementById('cliCpf').value = '';
+                    document.getElementById('cliTel').value = ''; document.getElementById('cliEnd').value = '';
+                    carregarDadosDoGAS(); // Atualiza as listas
+                }
+            } catch(e) { alert("Erro ao salvar cliente."); }
+            mostrarLoader(false);
+        }
+
+        async function salvarOrcamentoNoGAS() {
+            const cliente = document.getElementById('clienteSelect').value;
+            const totalFormatado = document.getElementById('totalDisplay').innerText;
+            const itensArray = [];
+            
+            // Coleta itens para o DB
+            document.querySelectorAll('.servico-item').forEach(item => {
+                const desc = item.querySelector('.desc-servico').value || "Serviço sem nome";
+                const tipo = item.querySelector('.tipo-cobranca').value;
+                let medida = "", unitario = 0, sub = 0;
+
+                if (tipo === 'unidade') {
+                    const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
+                    unitario = parseFloat(item.querySelector('.valor-unit').value) || 0;
+                    sub = qtd * unitario; medida = `${qtd} un`;
+                } else {
+                    const l = parseFloat(item.querySelector('.largura-m2').value) || 0;
+                    const a = parseFloat(item.querySelector('.altura-m2').value) || 0;
+                    unitario = parseFloat(item.querySelector('.valor-m2').value) || 0;
+                    const area = l * a; sub = area * unitario; medida = `${area.toFixed(2)} m²`;
+                }
+                
+                if(sub > 0) {
+                    itensArray.push({ descricao: desc, medida: medida, unitario: unitario.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), subtotal: sub.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) });
+                }
+            });
+
+            if(itensArray.length === 0) return alert('Adicione pelo menos um serviço com valor.');
+
+            const payload = {
+                action: 'salvarOrcamento',
+                id: Date.now(),
+                data: new Date().toLocaleDateString('pt-BR'),
+                cliente: cliente,
+                total: totalFormatado,
+                itens: itensArray
+            };
+
+            mostrarLoader(true);
+            try {
+                const response = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+                const res = await response.json();
+                if(res.status === 'sucesso') {
+                    alert('Orçamento salvo na planilha!');
+                    document.getElementById('lista-servicos').innerHTML = '';
+                    document.getElementById('totalDisplay').innerText = 'R$ 0,00';
+                    voltarParaLista();
+                    carregarDadosDoGAS();
+                }
+            } catch(e) { alert("Erro ao salvar orçamento."); }
+            mostrarLoader(false);
+        }
+
+        // --- RENDERIZADORES DE TELA ---
+        function atualizarSelectClientes() {
+            const select = document.getElementById('clienteSelect');
+            select.innerHTML = '<option value="Consumidor Final">Consumidor Final</option>';
+            dadosClientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.nome; opt.innerText = c.nome;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderizarListaClientes() {
+            const container = document.getElementById('container-lista-cli');
+            container.innerHTML = dadosClientes.length === 0 ? '<p style="color:#6B7280; font-size:0.9rem;">Nenhum cliente salvo.</p>' : '';
+            dadosClientes.forEach(c => {
+                container.innerHTML += `<div style="border-bottom: 1px solid #E5E7EB; padding: 10px 0;">
+                    <strong>${c.nome}</strong><br>
+                    <span style="font-size:0.8rem; color:#6B7280;">${c.tel} | ${c.end}</span>
+                </div>`;
+            });
+        }
+
+        function renderizarListaOrcamentos() {
+            const container = document.getElementById('container-lista-orc');
+            container.innerHTML = orcamentosSalvos.length === 0 ? '<p style="text-align:center; color:#6B7280; margin-top:30px;">Nenhum orçamento na planilha.</p>' : '';
+            
+            orcamentosSalvos.forEach(orc => {
+                // Monta o texto resumo pro WhatsApp
+                let resumoTexto = `*Orçamento de Pintura*\n\n*Cliente:* ${orc.cliente}\n*Data:* ${orc.data}\n\n*Serviços:*\n`;
+                orc.itens.forEach(i => { resumoTexto += `- ${i.descricao}\n`; });
+                resumoTexto += `*Total:* ${orc.total}`;
+
+                container.innerHTML += `
+                    <div class="orcamento-salvo-card">
+                        <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
+                            <strong style="font-size: 1.1rem;">${orc.cliente}</strong>
+                            <span style="color: #6B7280; font-size: 0.8rem;">${orc.data}</span>
+                        </div>
+                        <div style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">${orc.total}</div>
+                        
+                        <div class="acoes-card">
+                            <button class="btn-share-text" onclick="compartilharTexto('${encodeURIComponent(resumoTexto)}')">💬 Texto</button>
+                            <button class="btn-share-pdf" onclick="gerarECompartilharPDF(${orc.id}, this)">📄 PDF</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
         // --- LÓGICA DE SERVIÇOS (M² vs Unidade) ---
         function adicionarServico() {
             const lista = document.getElementById('lista-servicos');
             const item = document.createElement('div');
             item.className = 'servico-item';
-            
             item.innerHTML = `
                 <button class="btn-remover" onclick="removerServico(this)">&times;</button>
                 <select class="tipo-cobranca" onchange="alternarModoCalculo(this)">
@@ -209,12 +357,10 @@
                 </select>
                 <label>Descrição</label>
                 <input type="text" class="desc-servico" placeholder="Ex: Pintura Externa">
-                
                 <div class="bloco-unidade row-2">
                     <div><label>Quantidade</label><input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()"></div>
                     <div><label>Valor Unit. (R$)</label><input type="number" class="valor-unit" placeholder="0.00" oninput="calcularTotal()"></div>
                 </div>
-
                 <div class="bloco-m2" style="display: none;">
                     <div class="row-2">
                         <div><label>Largura (m)</label><input type="number" class="largura-m2" placeholder="0.0" oninput="calcularTotal()"></div>
@@ -228,15 +374,9 @@
         }
 
         function alternarModoCalculo(selectElem) {
-            const servicoItem = selectElem.closest('.servico-item');
-            const blocoUnidade = servicoItem.querySelector('.bloco-unidade');
-            const blocoM2 = servicoItem.querySelector('.bloco-m2');
-
-            if (selectElem.value === 'unidade') {
-                blocoUnidade.style.display = 'grid'; blocoM2.style.display = 'none';
-            } else {
-                blocoUnidade.style.display = 'none'; blocoM2.style.display = 'block';
-            }
+            const item = selectElem.closest('.servico-item');
+            if (selectElem.value === 'unidade') { item.querySelector('.bloco-unidade').style.display = 'grid'; item.querySelector('.bloco-m2').style.display = 'none'; }
+            else { item.querySelector('.bloco-unidade').style.display = 'none'; item.querySelector('.bloco-m2').style.display = 'block'; }
             calcularTotal();
         }
 
@@ -247,131 +387,29 @@
             document.querySelectorAll('.servico-item').forEach(item => {
                 const tipo = item.querySelector('.tipo-cobranca').value;
                 if (tipo === 'unidade') {
-                    const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
-                    const valor = parseFloat(item.querySelector('.valor-unit').value) || 0;
-                    totalGeral += (qtd * valor);
+                    totalGeral += (parseFloat(item.querySelector('.qtd-servico').value) || 0) * (parseFloat(item.querySelector('.valor-unit').value) || 0);
                 } else {
-                    const l = parseFloat(item.querySelector('.largura-m2').value) || 0;
-                    const a = parseFloat(item.querySelector('.altura-m2').value) || 0;
-                    const valorM2 = parseFloat(item.querySelector('.valor-m2').value) || 0;
-                    const area = l * a;
+                    const area = (parseFloat(item.querySelector('.largura-m2').value) || 0) * (parseFloat(item.querySelector('.altura-m2').value) || 0);
                     item.querySelector('.area-display').innerText = area.toFixed(2);
-                    totalGeral += (area * valorM2);
+                    totalGeral += area * (parseFloat(item.querySelector('.valor-m2').value) || 0);
                 }
             });
             document.getElementById('totalDisplay').innerText = totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            return totalGeral;
         }
 
-        // --- SALVAR, COMPARTILHAR TEXTO E PDF ---
-        let orcamentosSalvos = [];
-
-        function formatarMoeda(valor) {
-            return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        function salvarOrcamento() {
-            const cliente = document.getElementById('nomeCliente').value;
-            if(!cliente) { alert("Preencha o nome do cliente."); return; }
-
-            const totalFormatado = document.getElementById('totalDisplay').innerText;
-            const itensArray = [];
-            let resumoItens = "";
-
-            // Coleta os dados precisos para o PDF e para o Texto
-            document.querySelectorAll('.servico-item').forEach(item => {
-                const desc = item.querySelector('.desc-servico').value || "Serviço sem nome";
-                const tipo = item.querySelector('.tipo-cobranca').value;
-                let medida = "", unitario = 0, sub = 0;
-
-                if (tipo === 'unidade') {
-                    const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
-                    unitario = parseFloat(item.querySelector('.valor-unit').value) || 0;
-                    sub = qtd * unitario;
-                    medida = `${qtd} un`;
-                } else {
-                    const l = parseFloat(item.querySelector('.largura-m2').value) || 0;
-                    const a = parseFloat(item.querySelector('.altura-m2').value) || 0;
-                    unitario = parseFloat(item.querySelector('.valor-m2').value) || 0;
-                    const area = l * a;
-                    sub = area * unitario;
-                    medida = `${area.toFixed(2)} m²`;
-                }
-                
-                if(sub > 0) {
-                    itensArray.push({ descricao: desc, medida: medida, unitario: formatarMoeda(unitario), subtotal: formatarMoeda(sub) });
-                    resumoItens += `- ${desc}\n`;
-                }
-            });
-
-            const novoOrcamento = {
-                id: Date.now(),
-                cliente: cliente,
-                data: new Date().toLocaleDateString('pt-BR'),
-                total: totalFormatado,
-                itens: itensArray,
-                resumoTexto: `*Orçamento de Pintura*\n\n*Cliente:* ${cliente}\n*Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n*Serviços:*\n${resumoItens}\n*Total:* ${totalFormatado}`
-            };
-
-            orcamentosSalvos.unshift(novoOrcamento);
-            
-            // Limpa form e volta
-            document.getElementById('nomeCliente').value = '';
-            document.getElementById('lista-servicos').innerHTML = '';
-            document.getElementById('totalDisplay').innerText = 'R$ 0,00';
-            carregarListaOrcamentos();
-            voltarParaLista();
-        }
-
-        function carregarListaOrcamentos() {
-            const container = document.getElementById('container-lista');
-            container.innerHTML = '';
-            if (orcamentosSalvos.length === 0) { container.innerHTML = '<p style="text-align:center; color: #6B7280;">Nenhum orçamento salvo.</p>'; return; }
-
-            orcamentosSalvos.forEach(orc => {
-                const div = document.createElement('div');
-                div.className = 'orcamento-salvo-card';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
-                        <strong style="font-size: 1.1rem;">${orc.cliente}</strong>
-                        <span style="color: #6B7280; font-size: 0.8rem;">${orc.data}</span>
-                    </div>
-                    <div style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">${orc.total}</div>
-                    
-                    <div class="acoes-card">
-                        <button class="btn-share-text" onclick="compartilharTexto('${encodeURIComponent(orc.resumoTexto)}')">
-                            💬 Texto
-                        </button>
-                        <button class="btn-share-pdf" onclick="gerarECompartilharPDF(${orc.id}, this)">
-                            📄 PDF
-                        </button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // Função 1: Compartilhar apenas Texto
+        // --- COMPARTILHAMENTOS ---
         async function compartilharTexto(textoCodificado) {
             const texto = decodeURIComponent(textoCodificado);
-            if (navigator.share) {
-                try { await navigator.share({ title: 'Orçamento', text: texto }); } catch (err) {}
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
-            }
+            if (navigator.share) { try { await navigator.share({ title: 'Orçamento', text: texto }); } catch (err) {} }
+            else { window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`); }
         }
 
-        // Função 2: Montar, Gerar e Compartilhar PDF
         async function gerarECompartilharPDF(id, btnElement) {
-            // Feedback visual no botão
             const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = '⏳ Gerando...';
-            btnElement.disabled = true;
+            btnElement.innerHTML = '⏳ Gerando...'; btnElement.disabled = true;
 
             try {
                 const orc = orcamentosSalvos.find(o => o.id === id);
-                
-                // Preenche o template oculto com os dados
                 document.getElementById('pdf-cliente-nome').innerText = orc.cliente;
                 document.getElementById('pdf-data').innerText = orc.data;
                 document.getElementById('pdf-id').innerText = orc.id.toString().slice(-6);
@@ -380,55 +418,36 @@
                 const tbody = document.getElementById('pdf-tabela-corpo');
                 tbody.innerHTML = '';
                 orc.itens.forEach(item => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${item.descricao}</td>
-                            <td>${item.medida}</td>
-                            <td>${item.unitario}</td>
-                            <td><strong>${item.subtotal}</strong></td>
-                        </tr>
-                    `;
+                    tbody.innerHTML += `<tr><td>${item.descricao}</td><td>${item.medida}</td><td>${item.unitario}</td><td><strong>${item.subtotal}</strong></td></tr>`;
                 });
 
-                // Configurações do HTML2PDF
                 const elemento = document.getElementById('pdf-template');
                 const opt = {
-                    margin:       10,
+                    margin:       [10, 10, 10, 10], // Margem de respiro para garantir o A4
                     filename:     `Orcamento_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
+                    // windowWidth força o HTML2Canvas a "enxergar" o documento como num desktop (sem cortar a borda)
+                    html2canvas:  { scale: 2, windowWidth: 800 }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Gera o arquivo Blob do PDF em memória
                 const pdfBlob = await html2pdf().set(opt).from(elemento).output('blob');
                 const file = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
 
-                // Tenta usar o compartilhamento nativo com o arquivo
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Orçamento em PDF',
-                        text: `Olá! Segue o orçamento para ${orc.cliente} em PDF.`
-                    });
+                    await navigator.share({ files: [file], title: 'Orçamento PDF', text: `Orçamento para ${orc.cliente}` });
                 } else {
-                    // Fallback: Se o celular/navegador não suportar anexo, ele baixa o PDF
-                    alert("Seu navegador não suporta envio direto do arquivo. O PDF será baixado para você enviar manualmente.");
                     html2pdf().set(opt).from(elemento).save();
                 }
-
             } catch (error) {
-                console.error("Erro ao gerar PDF:", error);
                 alert("Houve um erro ao gerar o PDF.");
             } finally {
-                btnElement.innerHTML = originalText;
-                btnElement.disabled = false;
+                btnElement.innerHTML = originalText; btnElement.disabled = false;
             }
         }
 
-        // Inicializa a lista
-        carregarListaOrcamentos();
-
+        // Inicialização
+        carregarDadosDoGAS();
     </script>
 </body>
 </html>
