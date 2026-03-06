@@ -2,34 +2,66 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Financeiro - Thiago Pintor</title>
+    
     <style>
-        /* Estilos básicos só pra gente começar */
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #F3F4F6; margin: 0; padding: 20px; color: #111827; }
-        header { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: white; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px;}
-        button { background: #1E293B; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        /* A MESMA BASE VISUAL DO SEU APP */
+        :root {
+            --primary: #1E293B; 
+            --primary-light: #334155; 
+            --primary-gradient: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            --bg-color: #F3F4F6;
+            --surface: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, Arial, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
+
+        header { background: var(--primary-gradient); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 10; letter-spacing: 0.5px; }
+
+        .container { padding: 20px; }
+        .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
+        
+        /* BARRA INFERIOR (IGUAL AO INDEX) */
+        nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -4px 10px rgba(0,0,0,0.03); z-index: 10; border-top: 1px solid var(--border); }
+        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; margin-top: 0; cursor: pointer; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h2>💰 Painel Financeiro</h2>
-    </header>
+    <header id="header-title">Financeiro</header>
 
-    <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <p>A tela do financeiro vai nascer aqui!</p>
+    <div class="container">
+        <div class="card">
+            <h3 style="color: var(--primary); margin-bottom: 10px;">Painel Financeiro 🚧</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">A navegação via GitHub está pronta. Aqui vamos colocar os gráficos de Entradas e Saídas.</p>
+        </div>
     </div>
 
-    <button onclick="voltarParaOrcamentos()">⬅ Voltar para Orçamentos</button>
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="window.location.href='index.html'">
+            <span class="nav-icon" style="font-size:1.3rem;">📝</span> Orçamentos
+        </button>
+        
+        <button class="nav-item active">
+            <span class="nav-icon" style="font-size:1.3rem;">💰</span> Financeiro
+        </button>
+        
+        <button class="nav-item" onclick="window.location.href='index.html'">
+            <span class="nav-icon" style="font-size:1.3rem;">👥</span> Clientes
+        </button>
+    </nav>
 
     <script>
-        // A tag <?= urlApp ?> é substituída pela URL real do seu app pelo Google!
-        const URL_APP = "<?= https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec ?>"; 
+        // O GS fica aqui guardadinho SÓ para quando a gente for salvar ou puxar dinheiro da planilha. 
+        // Não apita nada na troca de páginas!
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec'; 
 
-        function voltarParaOrcamentos() {
-            // Volta para o index
-            window.top.location.href = URL_APP + "?p=index";
-        }
     </script>
 </body>
 </html>
