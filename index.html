@@ -126,7 +126,7 @@
                 <input type="hidden" id="orcamentoIdEditando">
                 <input type="hidden" id="orcamentoDataEditando">
 
-                <button class="btn-primary" id="btnSalvarOrc" onclick="salvarOrcamentoNoGAS()">💾 Salvar na Planilha</button>
+                <button class="btn-primary" id="btnSalvarOrc" onclick="salvarOrcamentoNoGAS()">💾 Salvar Orçamento</button>
             </div>
         </div>
     </main>
@@ -518,11 +518,11 @@
                     <button class="btn-remover" onclick="removerServico(this)">X Remover</button>
                 </div>
                 <select class="tipo-cobranca" style="margin-bottom:10px;" onchange="alternarModoCalculo(this)">
-                    <option value="unidade">Cobrar por Fixo / Unidade</option>
-                    <option value="m2">Cobrar por Metro Quadrado (m²)</option>
+                    <option value="unidade">Cobrar por Unidade</option>
+                    <option value="m2">Cobrar por m²</option>
                 </select>
                 <label style="margin-top: 5px;">Descrição do Serviço</label>
-                <input type="text" class="desc-servico" placeholder="Ex: Pintura Externa Texturizada">
+                <input type="text" class="desc-servico" placeholder="descrição...">
                 <div class="bloco-unidade row-2" style="margin-top:10px;">
                     <div><label>Quantidade</label><input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()"></div>
                     <div><label>V. Unitário (R$)</label><input type="number" class="valor-unit" placeholder="0.00" oninput="calcularTotal()"></div>
