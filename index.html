@@ -6,7 +6,7 @@
     <title>Sistema de Pinturas</title>
     <style>
         :root {
-            --primary: #4F46E5; /* Indigo moderno */
+            --primary: #4F46E5;
             --bg-color: #F3F4F6;
             --surface: #FFFFFF;
             --text-main: #1F2937;
@@ -20,23 +20,17 @@
         
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; }
 
-        /* Cabeçalho */
         header { background: var(--primary); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 10; }
 
-        /* Views (Abas) */
         .view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Formulários e Cards */
         .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
         label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; margin-top: 15px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--bg-color); outline: none; }
+        input, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; background: var(--bg-color); outline: none; transition: 0.2s; }
         input:focus, select:focus { border-color: var(--primary); }
         
-        /* Sistema Dinâmico de Serviços */
-        .servico-item { border-left: 3px solid var(--primary); padding-left: 10px; margin-bottom: 15px; position: relative; }
-        .btn-remover { position: absolute; top: 0; right: 0; background: none; border: none; color: var(--danger); font-size: 1.5rem; }
         .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         /* Botões */
@@ -44,20 +38,23 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-outline { background: transparent; color: var(--primary); border: 2px dashed var(--primary); }
         .btn-success { background: var(--success); color: white; }
+        .btn-header { width: auto; padding: 8px 12px; font-size: 0.9rem; margin-top: 0; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
+        .btn-share { background: #25D366; color: white; margin-top: 10px; padding: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; } /* Cor do WhatsApp */
 
-        /* Dashboard Financeiro */
-        .dash-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .dash-card { padding: 15px; border-radius: 8px; text-align: center; color: white; font-weight: bold; }
-        .dash-entrada { background: var(--success); }
-        .dash-saida { background: var(--danger); }
-        .dash-saldo { background: var(--text-main); grid-column: span 2; }
+        /* Lista e FAB */
+        .header-lista { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; border-radius: 30px; background: var(--primary); color: white; font-size: 2rem; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4); display: flex; align-items: center; justify-content: center; z-index: 100; margin-top: 0; padding: 0; }
+        .orcamento-salvo-card { border-left: 4px solid var(--primary); padding: 15px; background: var(--surface); border-radius: 8px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        /* Sistema Dinâmico de Serviços */
+        .servico-item { border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; background: #fafafa; }
+        .btn-remover { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--danger); font-size: 1.5rem; width: auto; padding: 0; margin: 0; }
+        .tipo-cobranca { margin-bottom: 15px; font-weight: bold; color: var(--primary); }
 
-        /* Navegação Inferior */
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 10; border-top: 1px solid var(--border); }
-        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; }
+        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; gap: 5px; width: auto; padding: 5px 20px; margin-top: 0; }
         .nav-item.active { color: var(--primary); font-weight: bold; }
-        .nav-icon { font-size: 1.5rem; }
-
+        
         .total-orcamento { font-size: 1.5rem; text-align: right; color: var(--primary); font-weight: bold; margin-top: 10px; }
     </style>
 </head>
@@ -66,56 +63,44 @@
     <header id="header-title">Orçamentos</header>
 
     <main id="view-orcamento" class="view active">
-        <div class="card">
-            <label>Cliente / Obra</label>
-            <input type="text" id="nomeCliente" placeholder="Ex: Casa do João - Fachada">
-            
-            <h3 style="margin-top: 25px; font-size: 1.1rem;">Serviços</h3>
-            <div id="lista-servicos">
-                </div>
-            
-            <button class="btn-outline" onclick="adicionarServico()">+ Adicionar Serviço</button>
-            
-            <div style="margin-top: 20px; border-top: 1px solid #E5E7EB; padding-top: 15px;">
-                <label>Total do Orçamento</label>
-                <div class="total-orcamento" id="totalDisplay">R$ 0,00</div>
+        
+        <div id="tela-lista-orcamentos">
+            <div class="header-lista">
+                <h3>Recentes</h3>
+                <button class="btn-header" onclick="carregarListaOrcamentos()">🔄 Atualizar</button>
             </div>
+            
+            <div id="container-lista">
+                </div>
 
-            <button class="btn-primary" onclick="salvarOrcamento()">Salvar e Gerar Resumo</button>
+            <button class="fab" onclick="abrirNovoOrcamento()">+</button>
         </div>
+
+        <div id="tela-novo-orcamento" style="display: none;">
+            <button class="btn-header" style="margin-bottom: 15px;" onclick="voltarParaLista()">⬅ Voltar para Lista</button>
+            
+            <div class="card">
+                <label>Cliente / Obra</label>
+                <input type="text" id="nomeCliente" placeholder="Ex: Casa do João - Fachada">
+                
+                <h3 style="margin-top: 25px; font-size: 1.1rem;">Serviços</h3>
+                <div id="lista-servicos"></div>
+                
+                <button class="btn-outline" onclick="adicionarServico()">+ Adicionar Serviço</button>
+                
+                <div style="margin-top: 20px; border-top: 1px solid #E5E7EB; padding-top: 15px;">
+                    <label>Total do Orçamento</label>
+                    <div class="total-orcamento" id="totalDisplay">R$ 0,00</div>
+                </div>
+
+                <button class="btn-primary" onclick="salvarOrcamento()">💾 Salvar Orçamento</button>
+            </div>
+        </div>
+
     </main>
 
     <main id="view-financeiro" class="view">
-        <div class="card">
-            <label>Filtrar por Mês</label>
-            <input type="month" id="mesFiltro" onchange="carregarFinanceiro()">
-
-            <div class="dash-cards">
-                <div class="dash-card dash-entrada">Entradas<br>R$ 0,00</div>
-                <div class="dash-card dash-saida">Saídas<br>R$ 0,00</div>
-                <div class="dash-card dash-saldo">Resultado<br>R$ 0,00</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 style="font-size: 1.1rem; margin-bottom: 10px;">Novo Lançamento</h3>
-            <label>Data</label>
-            <input type="date" id="finData">
-            
-            <label>Tipo</label>
-            <select id="finTipo">
-                <option value="Entrada">Entrada</option>
-                <option value="Saida">Saída (Despesa)</option>
-            </select>
-
-            <label>Descrição</label>
-            <input type="text" id="finDesc" placeholder="Ex: Tintas Suvinil ou Pagamento João">
-            
-            <label>Valor</label>
-            <input type="number" id="finValor" placeholder="R$ 0,00">
-
-            <button class="btn-success" onclick="salvarLancamento()">Registrar</button>
-        </div>
+        <div class="card"><p>Em desenvolvimento...</p></div>
     </main>
 
     <nav class="bottom-nav">
@@ -131,59 +116,219 @@
     </nav>
 
     <script>
-            function adicionarServico() {
-            const listaServicos = document.getElementById('lista-servicos');
+        // --- NAVEGAÇÃO ---
+        function mudarAba(abaId, elementoBtn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            let abaParaMostrar = document.getElementById('view-' + abaId);
+            if(abaParaMostrar) abaParaMostrar.classList.add('active');
+            elementoBtn.classList.add('active');
+            const titulos = { 'orcamento': 'Orçamentos', 'financeiro': 'Financeiro', 'cliente': 'Clientes' };
+            document.getElementById('header-title').innerText = titulos[abaId];
+        }
+
+        function abrirNovoOrcamento() {
+            document.getElementById('tela-lista-orcamentos').style.display = 'none';
+            document.getElementById('tela-novo-orcamento').style.display = 'block';
+            if(document.getElementById('lista-servicos').children.length === 0) adicionarServico();
+        }
+
+        function voltarParaLista() {
+            document.getElementById('tela-novo-orcamento').style.display = 'none';
+            document.getElementById('tela-lista-orcamentos').style.display = 'block';
+        }
+
+        // --- LÓGICA DE SERVIÇOS (M² vs Unidade) ---
+        function adicionarServico() {
+            const lista = document.getElementById('lista-servicos');
+            const item = document.createElement('div');
+            item.className = 'servico-item';
             
-            // Cria a div que vai conter os campos
-            const servicoItem = document.createElement('div');
-            servicoItem.className = 'servico-item card'; // Usa as classes já definidas no seu CSS
-            
-            // Monta o HTML dos campos de entrada
-            servicoItem.innerHTML = `
-                <button class="btn-remover" onclick="removerServico(this)" title="Remover Serviço">&times;</button>
+            item.innerHTML = `
+                <button class="btn-remover" onclick="removerServico(this)">&times;</button>
                 
-                <label>Descrição do Serviço</label>
-                <input type="text" class="desc-servico" placeholder="Ex: Preparação e pintura de parede">
+                <select class="tipo-cobranca" onchange="alternarModoCalculo(this)">
+                    <option value="unidade">Cobrar por Fixo / Unidade</option>
+                    <option value="m2">Cobrar por Metro Quadrado (m²)</option>
+                </select>
+
+                <label>Descrição</label>
+                <input type="text" class="desc-servico" placeholder="Ex: Pintura Externa">
                 
-                <div class="row-2">
+                <div class="bloco-unidade row-2">
                     <div>
-                        <label>Quantidade (m², un, etc)</label>
+                        <label>Quantidade</label>
                         <input type="number" class="qtd-servico" value="1" min="1" oninput="calcularTotal()">
                     </div>
                     <div>
-                        <label>Valor Unitário (R$)</label>
-                        <input type="number" class="valor-servico" placeholder="0.00" oninput="calcularTotal()">
+                        <label>Valor Unit. (R$)</label>
+                        <input type="number" class="valor-unit" placeholder="0.00" oninput="calcularTotal()">
+                    </div>
+                </div>
+
+                <div class="bloco-m2" style="display: none;">
+                    <div class="row-2">
+                        <div>
+                            <label>Largura (m)</label>
+                            <input type="number" class="largura-m2" placeholder="0.0" oninput="calcularTotal()">
+                        </div>
+                        <div>
+                            <label>Altura (m)</label>
+                            <input type="number" class="altura-m2" placeholder="0.0" oninput="calcularTotal()">
+                        </div>
+                    </div>
+                    <div>
+                        <label>Valor do m² (R$)</label>
+                        <input type="number" class="valor-m2" placeholder="0.00" oninput="calcularTotal()">
+                    </div>
+                    <div style="text-align: right; font-size: 0.85rem; color: #6B7280; margin-top: 5px;">
+                        Área: <span class="area-display">0.00</span> m²
                     </div>
                 </div>
             `;
-            
-            // Adiciona o novo bloco à lista
-            listaServicos.appendChild(servicoItem);
+            lista.appendChild(item);
         }
 
-        // Função para remover um serviço específico
+        function alternarModoCalculo(selectElem) {
+            const servicoItem = selectElem.closest('.servico-item');
+            const blocoUnidade = servicoItem.querySelector('.bloco-unidade');
+            const blocoM2 = servicoItem.querySelector('.bloco-m2');
+
+            if (selectElem.value === 'unidade') {
+                blocoUnidade.style.display = 'grid';
+                blocoM2.style.display = 'none';
+            } else {
+                blocoUnidade.style.display = 'none';
+                blocoM2.style.display = 'block';
+            }
+            calcularTotal();
+        }
+
         function removerServico(botao) {
-            botao.parentElement.remove(); // Remove a div .servico-item
-            calcularTotal(); // Recalcula o total após remover
+            botao.closest('.servico-item').remove();
+            calcularTotal();
         }
 
-        // Função para calcular e atualizar o valor total do orçamento na tela
         function calcularTotal() {
-            let total = 0;
+            let totalGeral = 0;
             const itens = document.querySelectorAll('.servico-item');
             
             itens.forEach(item => {
-                const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
-                const valor = parseFloat(item.querySelector('.valor-servico').value) || 0;
-                total += (qtd * valor);
+                const tipo = item.querySelector('.tipo-cobranca').value;
+                let subtotal = 0;
+
+                if (tipo === 'unidade') {
+                    const qtd = parseFloat(item.querySelector('.qtd-servico').value) || 0;
+                    const valor = parseFloat(item.querySelector('.valor-unit').value) || 0;
+                    subtotal = qtd * valor;
+                } else {
+                    const largura = parseFloat(item.querySelector('.largura-m2').value) || 0;
+                    const altura = parseFloat(item.querySelector('.altura-m2').value) || 0;
+                    const valorM2 = parseFloat(item.querySelector('.valor-m2').value) || 0;
+                    
+                    const area = largura * altura;
+                    item.querySelector('.area-display').innerText = area.toFixed(2);
+                    subtotal = area * valorM2;
+                }
+                totalGeral += subtotal;
             });
             
-            // Atualiza a div de exibição do total formatando como Moeda (BRL)
-            document.getElementById('totalDisplay').innerText = total.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
+            document.getElementById('totalDisplay').innerText = totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            return totalGeral;
+        }
+
+        // --- SALVAR E COMPARTILHAR ---
+
+        // Array provisório para simular orçamentos salvos enquanto não liga o GAS 100%
+        let orcamentosSalvos = [];
+
+        function salvarOrcamento() {
+            const cliente = document.getElementById('nomeCliente').value;
+            if(!cliente) { alert("Preencha o nome do cliente."); return; }
+
+            const total = calcularTotal();
+            const totalFormatado = document.getElementById('totalDisplay').innerText;
+            
+            // Monta o resumo para enviar depois
+            let resumoItens = "";
+            document.querySelectorAll('.servico-item').forEach(item => {
+                const desc = item.querySelector('.desc-servico').value || "Serviço sem nome";
+                resumoItens += `- ${desc}\n`;
+            });
+
+            const novoOrcamento = {
+                id: Date.now(),
+                cliente: cliente,
+                data: new Date().toLocaleDateString('pt-BR'),
+                total: totalFormatado,
+                resumoTexto: `*Orçamento de Pintura*\n\n*Cliente:* ${cliente}\n*Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n*Serviços:*\n${resumoItens}\n*Total:* ${totalFormatado}`
+            };
+
+            // Adiciona na lista local (AQUI ENTRARIA O SEU FETCH PARA O GAS)
+            orcamentosSalvos.unshift(novoOrcamento);
+            
+            alert("Orçamento Salvo!");
+            
+            // Limpa form e volta pra lista
+            document.getElementById('nomeCliente').value = '';
+            document.getElementById('lista-servicos').innerHTML = '';
+            document.getElementById('totalDisplay').innerText = 'R$ 0,00';
+            
+            carregarListaOrcamentos();
+            voltarParaLista();
+        }
+
+        function carregarListaOrcamentos() {
+            const container = document.getElementById('container-lista');
+            container.innerHTML = '';
+
+            if (orcamentosSalvos.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: #6B7280; margin-top: 30px;">Nenhum orçamento salvo ainda.</p>';
+                return;
+            }
+
+            orcamentosSalvos.forEach(orc => {
+                const div = document.createElement('div');
+                div.className = 'orcamento-salvo-card';
+                // O botão abaixo chama a função de compartilhamento nativo!
+                div.innerHTML = `
+                    <div style="display:flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong style="font-size: 1.1rem;">${orc.cliente}</strong>
+                        <span style="color: #6B7280; font-size: 0.8rem;">${orc.data}</span>
+                    </div>
+                    <div style="color: var(--primary); font-weight: bold; font-size: 1.2rem;">${orc.total}</div>
+                    
+                    <button class="btn-share" onclick="compartilharNativalmente('${encodeURIComponent(orc.resumoTexto)}')">
+                        📤 Compartilhar
+                    </button>
+                `;
+                container.appendChild(div);
             });
         }
+
+        // A MÁGICA DO COMPARTILHAMENTO AQUI
+        async function compartilharNativalmente(textoCodificado) {
+            const texto = decodeURIComponent(textoCodificado);
+            
+            // Verifica se o navegador do celular suporta a API de compartilhamento nativa
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Orçamento de Pintura',
+                        text: texto
+                    });
+                } catch (err) {
+                    console.log('Usuário cancelou o compartilhamento', err);
+                }
+            } else {
+                // Fallback: se estiver no PC ou navegador não suportar, abre o WhatsApp Web/App direto
+                window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
+            }
+        }
+
+        // Inicializa a lista vazia
+        carregarListaOrcamentos();
+
     </script>
 </body>
 </html>
