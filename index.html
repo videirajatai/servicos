@@ -461,6 +461,7 @@
 
         // A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
 // A MÁGICA DO PDF COMO O RV BLOCOS: INJEÇÃO DIRETA DE HTML EM STRING!
+// A MÁGICA DO PDF (PENSANDO FORA DA CAIXA - ESTRUTURA 100% RV BLOCOS)
         async function gerarECompartilharPDF(id, btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '⏳ Gerando...'; btnElement.disabled = true;
@@ -469,58 +470,64 @@
                 const orc = orcamentosSalvos.find(o => o.id === id);
                 const idFormatado = String(orc.id).padStart(4, '0');
 
-                // Prepara as linhas da tabela
+                // Prepara as linhas
                 const itemsHtml = orc.itens.map(i => {
                     return `
                     <tr>
-                        <td style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151;">${i.descricao}</td>
-                        <td align="center" style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151;">${i.medida}</td>
-                        <td align="center" style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151;">${i.unitario}</td>
-                        <td align="center" style="border-bottom: 1px solid #E5E7EB; padding: 12px; color: #374151; font-weight: bold;">${i.subtotal}</td>
+                        <td style="border-bottom: 1px solid #e2e8f0; padding: 10px; color: #1e293b;">${i.descricao}</td>
+                        <td align="center" style="border-bottom: 1px solid #e2e8f0; padding: 10px; color: #1e293b;">${i.medida}</td>
+                        <td align="center" style="border-bottom: 1px solid #e2e8f0; padding: 10px; color: #1e293b;">${i.unitario}</td>
+                        <td align="right" style="border-bottom: 1px solid #e2e8f0; padding: 10px; color: #1e293b; font-weight: bold;">${i.subtotal}</td>
                     </tr>`;
                 }).join('');
 
-                // LARGURA VOLTOU PARA 800px COM AS TRAVAS NO CANVAS
+                // ESTRUTURA PURA DE TABELAS (100% FLUIDO PARA A4)
                 const htmlParaO_PDF = `
-                <div style="font-family: Arial, sans-serif; padding: 20px; background: white; width: 800px; box-sizing: border-box; margin: 0;">
-                    
-                    <table width="100%" style="border-bottom: 3px solid #1E293B; padding-bottom: 20px; margin-bottom: 25px;">
+                <div style="font-family: 'Helvetica', 'Arial', sans-serif; padding: 20px; background: white; box-sizing: border-box;">
+
+                    <table width="100%" style="border-bottom: 2px solid #0f172a; padding-bottom: 15px; margin-bottom: 20px;">
                         <tr>
-                            <td valign="middle" style="text-align: left;">
-                                <h1 style="color: #1E293B; font-size: 28px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">THIAGO PINTOR</h1>
-                                <h2 style="font-size: 14px; color: #374151; margin: 5px 0 0 0; font-weight: 600;">Thiago Pereira da Silva &nbsp;|&nbsp; CPF: 005.552.121-57</h2>
-                                <p style="color: #6B7280; font-size: 12px; margin: 5px 0 0 0;">📞 (64) 99904-6567 / (64) 99908-8480</p>
+                            <td valign="middle">
+                                <h2 style="font-size: 26px; font-weight: 800; color: #1E293B; text-transform: uppercase; margin: 0;">THIAGO PINTOR</h2>
+                                <div style="font-size: 13px; color: #475569; margin-top: 5px; font-weight: bold;">Thiago Pereira da Silva | CPF: 005.552.121-57</div>
+                                <div style="font-size: 13px; color: #475569; margin-top: 3px;">📞 (64) 99904-6567 / (64) 99908-8480</div>
                             </td>
-                            <td align="right" valign="middle" style="width: 150px;">
-                                <div style="width: 120px; height: 70px; background: #F3F4F6; border: 2px dashed #D1D5DB; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #9CA3AF; text-align: center; border-radius: 8px; margin-left: auto;">
-                                    Logo <br>Empresa
+                            <td align="right" valign="middle">
+                                <div style="width: 120px; height: 60px; background: #f1f5f9; border: 2px dashed #cbd5e1; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; color: #94a3b8; border-radius: 6px;">
+                                    Logo<br>Empresa
                                 </div>
                             </td>
                         </tr>
                     </table>
 
-                    <table width="100%" style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; margin-bottom: 25px; padding: 15px;">
+                    <table width="100%" style="margin-bottom: 20px;" cellpadding="0">
                         <tr>
-                            <td width="50%" valign="top" style="padding: 5px;">
-                                <strong style="color: #1E293B; font-size: 12px; text-transform: uppercase;">Cliente / Obra</strong><br>
-                                <span style="color: #4B5563; font-size: 18px; display: inline-block; margin-top: 5px;">${orc.cliente}</span>
+                            <td width="48%" valign="top">
+                                <div style="border: 1px solid #e2e8f0; border-radius: 6px;">
+                                    <div style="background-color: #f1f5f9; padding: 5px 10px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #e2e8f0;">Cliente / Obra</div>
+                                    <div style="padding: 10px; font-size: 16px; color: #1e293b;"><strong>${orc.cliente}</strong></div>
+                                </div>
                             </td>
-                            <td width="50%" align="right" valign="top" style="padding: 5px;">
-                                <strong style="color: #1E293B; font-size: 12px; text-transform: uppercase;">Orçamento Nº</strong>
-                                <span style="font-weight: bold; color: #1E293B; font-size: 18px; margin-left: 5px;">${idFormatado}</span><br>
-                                <strong style="color: #1E293B; font-size: 12px; text-transform: uppercase; margin-top: 10px; display: inline-block;">Data</strong>
-                                <span style="color: #4B5563; font-size: 16px; margin-left: 5px;">${orc.data}</span>
+                            <td width="4%"></td>
+                            <td width="48%" valign="top">
+                                <div style="border: 1px solid #e2e8f0; border-radius: 6px;">
+                                    <div style="background-color: #f1f5f9; padding: 5px 10px; font-size: 10px; font-weight: bold; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #e2e8f0;">Dados do Orçamento</div>
+                                    <div style="padding: 10px; line-height: 1.5; font-size: 13px; color: #1e293b;">
+                                        <strong>Nº:</strong> ${idFormatado}<br>
+                                        <strong>Data:</strong> ${orc.data}
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     </table>
 
-                    <table width="100%" style="border-collapse: collapse; margin-bottom: 25px;">
+                    <table width="100%" style="border-collapse: collapse; margin-bottom: 20px;">
                         <thead>
-                            <tr style="background: #1E293B; color: white;">
-                                <th align="left" style="padding: 12px; font-size: 13px; text-transform: uppercase;">Descrição do Serviço</th>
-                                <th align="center" style="padding: 12px; font-size: 13px; text-transform: uppercase;">Medida/Qtd</th>
-                                <th align="center" style="padding: 12px; font-size: 13px; text-transform: uppercase;">V. Unitário</th>
-                                <th align="center" style="padding: 12px; font-size: 13px; text-transform: uppercase;">Subtotal</th>
+                            <tr style="background-color: #1E293B; color: white;">
+                                <th align="left" style="padding: 10px; font-size: 12px; text-transform: uppercase;">Descrição do Serviço</th>
+                                <th align="center" style="padding: 10px; font-size: 12px; text-transform: uppercase;">Medida/Qtd</th>
+                                <th align="center" style="padding: 10px; font-size: 12px; text-transform: uppercase;">V. Unitário</th>
+                                <th align="right" style="padding: 10px; font-size: 12px; text-transform: uppercase;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -528,31 +535,34 @@
                         </tbody>
                     </table>
 
-                    <div style="text-align: right; padding: 15px 20px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 20px; color: #1F2937;">
-                        Valor Total: <strong style="color: #1E293B; margin-left: 15px;">${orc.total}</strong>
+                    <table width="100%" style="margin-top: 10px;">
+                        <tr>
+                            <td width="50%"></td>
+                            <td width="50%" align="right">
+                                <div style="background-color: #f1f5f9; padding: 15px; border-top: 2px solid #0f172a; font-size: 18px; font-weight: 900; color: #1e293b; border-radius: 6px;">
+                                    <span style="float: left;">TOTAL:</span>
+                                    <span>${orc.total}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="margin-top: 40px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                        Válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo.<br>
+                        <strong>Agradecemos a preferência!</strong>
                     </div>
 
-                    <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #6B7280; border-top: 1px solid #E5E7EB; padding-top: 20px;">
-                        <p style="margin: 0 0 5px 0;">Orçamento válido por 15 dias. Os valores podem sofrer alterações caso haja mudança no escopo.</p>
-                        <p style="margin: 0;"><strong>Agradecemos a preferência!</strong></p>
-                    </div>
                 </div>`;
 
                 const container = document.createElement('div');
                 container.innerHTML = htmlParaO_PDF;
 
-                // O SEGREDO ESTÁ AQUI: width: 800 e windowWidth: 800 forçam a captura total!
+                // OPÇÕES LIMPAS (O html2pdf vai cuidar do tamanho A4 sozinho)
                 const opt = {
                     margin:       [10, 10, 10, 10], 
                     filename:     `Orcamento_${idFormatado}_${orc.cliente.replace(/\s+/g, '_')}.pdf`,
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { 
-                        scale: 2, 
-                        useCORS: true, 
-                        scrollY: 0, 
-                        windowWidth: 800, 
-                        width: 800 
-                    }, 
+                    html2canvas:  { scale: 2, useCORS: true }, 
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
