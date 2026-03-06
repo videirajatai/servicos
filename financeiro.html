@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Financeiro - Thiago Pintor</title>
+    <style>
+        /* Estilos básicos só pra gente começar */
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #F3F4F6; margin: 0; padding: 20px; color: #111827; }
+        header { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: white; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px;}
+        button { background: #1E293B; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>💰 Painel Financeiro</h2>
+    </header>
+
+    <div style="background: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <p>A tela do financeiro vai nascer aqui!</p>
+    </div>
+
+    <button onclick="voltarParaOrcamentos()">⬅ Voltar para Orçamentos</button>
+
+    <script>
+        // A tag <?= urlApp ?> é substituída pela URL real do seu app pelo Google!
+        const URL_APP = "<?= https://script.google.com/macros/s/AKfycbw-ZfkndK4VW8A8XdV9k7pDgjrktzpHrNR2VGtT5KWKCjV6kT3xyok6nZEQE0nG-MOI/exec ?>"; 
+
+        function voltarParaOrcamentos() {
+            // Volta para o index
+            window.top.location.href = URL_APP + "?p=index";
+        }
+    </script>
+</body>
+</html>
