@@ -577,40 +577,35 @@
         
         document.getElementById('relData').valueAsDate = new Date();
         
-        // --- 1. BLOCO DO SUPABASE (Membros) Isolado ---
+        // --- 1. BUSCA O SUPABASE (Se falhar, não quebra o resto) ---
         try {
             dadosMembros = await lerSupabase('membros'); 
             document.getElementById('badge-total-membros').innerText = dadosMembros.length;
             renderizarMembros(dadosMembros);
         } catch (erroSupabase) {
-            console.error("Erro no Supabase:", erroSupabase);
-            document.getElementById('gridMembros').innerHTML = '<p style="text-align:center; color:red; padding: 20px;">Não foi possível carregar os membros. Verifique o console.</p>';
+            console.error("Supabase bloqueou a leitura:", erroSupabase);
+            document.getElementById('gridMembros').innerHTML = '<p style="text-align:center; color:#dc3545; padding: 20px; font-weight: bold;">Erro no Supabase. Verifique a chave Anon e a política RLS.</p>';
         }
 
-        // --- 2. BLOCO DO GOOGLE (Células, Palavras, Agenda) Isolado ---
+        // --- 2. BUSCA O GOOGLE (Funciona independente do Supabase) ---
         try {
-            // Busca o resto no Google
             const res = await fetchGoogle('buscarDadosIniciais');
             dadosCelulas = res.celulas;
             renderizarCelulas(res.celulas);
             preencherSelects(res.celulas);
             
-            // Busca palavras
             const palavras = await fetchGoogle('buscarPalavras');
             listaPalavras = palavras.reverse(); 
             renderizarPalavras(listaPalavras);
 
-            // Busca agenda
             try {
                 const agendaRes = await fetchGoogle('buscarAgenda');
                 listaAgenda = agendaRes || [];
                 renderizarAgenda(listaAgenda);
             } catch(e) {
-                console.log("Ainda sem dados de agenda configurados no backend.");
                 renderizarAgenda([]);
             }
 
-            // Busca Versículo do Dia
             carregarVersiculoDoDia();
             
         } catch(erroGoogle) {
@@ -619,8 +614,7 @@
             if(icon) icon.classList.remove('fa-spin');
         }
       }
-            // Busca Versículo do Dia
-          carregarVersiculoDoDia();
+         
             /*try {
                 const versiculo = await fetchGoogle('buscarVersiculoDoDia');
                 document.getElementById('texto-versiculo-dia').innerText = `"${versiculo.texto}"`;
