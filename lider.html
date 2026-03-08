@@ -571,7 +571,7 @@
       }
       //////////////////////nova acima
 
-      async function carregarTudo() {
+async function carregarTudo() {
         const icon = document.getElementById('iconRefresh'); 
         if(icon) icon.classList.add('fa-spin');
         
@@ -614,24 +614,7 @@
             if(icon) icon.classList.remove('fa-spin');
         }
       }
-         
-            /*try {
-                const versiculo = await fetchGoogle('buscarVersiculoDoDia');
-                document.getElementById('texto-versiculo-dia').innerText = `"${versiculo.texto}"`;
-                document.getElementById('ref-versiculo-dia').innerText = `- ${versiculo.referencia}`;
-            } catch(e) {
-                // Versículo reserva caso dê algum erro no Drive
-                document.getElementById('texto-versiculo-dia').innerText = "\"Alegrai-vos sempre no Senhor; outra vez digo: alegrai-vos.\"";
-                document.getElementById('ref-versiculo-dia').innerText = "- Filipenses 4:4";
-            }*/
-            
-        } catch(e) {
-            console.log("Erro ao carregar dados.");
-        } finally {
-            if(icon) icon.classList.remove('fa-spin');
-        }
-      }
-
+/////////////////////////////////////////
       function mudarSecao(s) {
          ['lista','celulas','cadastro','relatorio','sugestao','palavras','agenda','cadastro-agenda'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
