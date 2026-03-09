@@ -349,10 +349,12 @@
         <button onclick="carregarTudo()" class="btn-refresh"><i id="iconRefresh" class="fas fa-sync-alt"></i></button>
       </div>
 
-      <div class="stat-card" id="card-versiculo">
-        <span class="titulo-versiculo"><!--<i class="fas fa-star"></i>--> Versículo do Dia</span>
-        <p class="texto-versiculo" id="texto-versiculo-dia">Preparando versículo...</p>
-        <span class="ref-versiculo" id="ref-versiculo-dia"></span>
+<div class="stat-card" id="card-versiculo">
+        <span class="titulo-versiculo"><i class="fas fa-star"></i> Versículo do Dia</span>
+        
+        <div id="dailyVersesWrapper"></div>
+        <script async defer src="https://dailyverses.net/get/verse.js?language=arc"></script>
+        
       </div>
 
       <button onclick="abrirBiblia()" class="btn-biblia-destaque">
@@ -608,11 +610,7 @@
         } catch (e) { 
             console.error("Sem tabela de agenda ainda");
             renderizarAgenda([]); 
-        }
-
-        // Busca Bíblia Aleatória no GitHub
-        carregarVersiculoAleatorio();
-            
+        }            
         if(icon) icon.classList.remove('fa-spin');
       }
 
