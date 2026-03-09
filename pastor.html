@@ -897,8 +897,8 @@ function renderizarCelulas() {
         <tr>
             <td><b>${c.nome}</b><br><small>${c.endereco||''}</small></td>
             <td>${c.lider || '-'}</td>
-            <td>${c.dia_horario || '-'}</td>
-            <td>
+            <td>${c.dia_horario || '-'}</td>          
+            <td>${c.endereco || '-'}</td>
                 <button onclick="editarCelula('${c.id}')" class="btn-card" style="margin-bottom:5px;"><i class="fas fa-edit"></i></button>
                 <button onclick="deletarCelula('${c.id}')" class="btn-card" style="color:red"><i class="fas fa-trash"></i></button>
             </td>
