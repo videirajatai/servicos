@@ -1032,48 +1032,92 @@ function recalcularFinanceiro() {
 }
 
 // ==========================================
-// MÓDULO: AGENDA
+// MÓDULO: AGENDA (VIA GOOGLE SCRIPT)
 // ==========================================
-function renderizarAgenda() {
+// COLOQUE AQUI A MESMA URL QUE VOCÊ USA NO DISCIPULADOR
+const URL_GOOGLE_AGENDA = 'https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec';
+
+async function carregarAgendaGoogle() {
     const grid = document.getElementById('listaAgenda');
-    if(dadosAgenda.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento agendado.</p>';
-        return;
+    grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;"><i class="fas fa-spinner fa-spin"></i> Carregando agenda...</p>';
+
+    try {
+        const res = await fetch(URL_GOOGLE_AGENDA);
+        const dados = await res.json();
+
+        if(!dados || dados.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; color:#999; grid-column: 1 / -1;">Nenhum evento agendado.</p>';
+            return;
+        }
+
+        // Renderiza os cards igual no discipulador, mas com botão de excluir (opcional)
+        grid.innerHTML = dados.map((a, index) => `
+            <div class="member-card">
+                <div style="display:flex; justify-content:space-between;">
+                    <b style="color:var(--primary);">${a.evento || a.descricao || 'Sem título'}</b>
+                    <span class="cat-badge">${a.data || ''}</span>
+                </div>
+                <p style="font-size:0.85rem; margin:8px 0;"><i class="fas fa-info-circle"></i> ${a.observacao || a.detalhes || '-'}</p>
+                <div class="status-row">
+                    <span class="status-pill">${a.categoria || 'Geral'}</span>
+                    <span class="status-pill ${a.tipo === 'Gratuito' ? 'active' : ''}">${a.tipo || '-'}</span>
+                </div>
+                <button onclick="deletarAgendaGoogle(${index})" class="btn-card" style="color:red; margin-top:10px;"><i class="fas fa-trash"></i> Excluir Evento</button>
+            </div>`).join('');
+            
+    } catch(e) {
+        console.error("Erro ao puxar agenda:", e);
+        grid.innerHTML = '<p style="text-align:center; color:red; grid-column: 1 / -1;">Erro ao carregar a agenda. Verifique o link.</p>';
     }
-    
-    grid.innerHTML = dadosAgenda.map(a => `
-        <div class="member-card">
-            <div style="display:flex; justify-content:space-between;">
-                <b style="color:var(--primary);">${a.evento}</b>
-                <span class="cat-badge">${a.data.split('-').reverse().join('/')}</span>
-            </div>
-            <p style="font-size:0.85rem; margin:8px 0;"><i class="fas fa-info-circle"></i> ${a.observacao || '-'}</p>
-            <div class="status-row">
-                <span class="status-pill">${a.categoria}</span>
-                <span class="status-pill ${a.tipo === 'Gratuito' ? 'active' : ''}">${a.tipo}</span>
-            </div>
-            <button onclick="deletarAgenda('${a.id}')" class="btn-card" style="color:red; margin-top:10px;"><i class="fas fa-trash"></i> Excluir Evento</button>
-        </div>`).join('');
 }
 
+// Formulário para SALVAR novo evento no Google
 document.getElementById('formAgenda').onsubmit = async function(e) {
     e.preventDefault();
+    const btn = document.getElementById('btnSalvarAgenda');
+    btn.disabled = true;
+    btn.innerText = "Salvando no Google...";
+
     const dados = {
+        acao: "inserir", // Parâmetro que você pode checar lá no seu Apps Script
         data: document.getElementById('agendaData').value,
         evento: document.getElementById('agendaDesc').value,
         observacao: document.getElementById('agendaObs').value,
         tipo: document.getElementById('agendaTipo').value,
         categoria: document.getElementById('agendaCat').value
     };
-    await inserirSupabase('agenda', dados);
-    await carregarTudo();
-    mudarSecao('agenda');
+
+    try {
+        await fetch(URL_GOOGLE_AGENDA, {
+            method: 'POST',
+            body: JSON.stringify(dados)
+            // Se der erro de CORS, você pode precisar usar: mode: 'no-cors'
+        });
+        
+        alert("Evento salvo com sucesso!");
+        this.reset();
+        await carregarAgendaGoogle();
+        mudarSecao('agenda');
+    } catch(e) {
+        alert("Erro ao salvar o evento.");
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Salvar Evento";
+    }
 };
 
-async function deletarAgenda(id) {
-    if(confirm("Excluir evento da agenda?")) {
-        await deletarSupabase('agenda', id);
-        await carregarTudo();
+// Se precisar excluir via Google
+async function deletarAgendaGoogle(index) {
+    if(confirm("Excluir este evento? (Requer que a função de exclusão esteja configurada no Google Script)")) {
+        try {
+            await fetch(URL_GOOGLE_AGENDA, {
+                method: 'POST',
+                body: JSON.stringify({ acao: "deletar", linha: index })
+            });
+            await carregarAgendaGoogle();
+        } catch(e) {
+            alert("Erro ao excluir.");
+        }
     }
 }
 
