@@ -863,7 +863,9 @@
           { id: "apocalipse", nome: "Apocalipse", caps: 22 }
       ];
 
-      async function abrirBiblia() {
+      let primeiraVezBiblia = true;
+
+      function abrirBiblia() {
           document.getElementById('painel-biblia').classList.add('aberto');
           const overlay = document.getElementById('biblia-overlay'); 
           overlay.style.display = 'block'; 
@@ -871,9 +873,8 @@
           
           iniciarBiblia(); // Preenche a lista com todos os livros
 
-          const conteudo = document.getElementById('biblia-conteudo');
-          // Se for a primeira vez que abre, já força carregar Gênesis 1
-          if (conteudo.innerText.includes("começar a leitura") || conteudo.innerText.includes("Selecione")) {
+          // Se for a primeira vez que abre, já carrega Gênesis 1 direto
+          if (primeiraVezBiblia) {
               const selectLivro = document.getElementById('biblia-livro');
               const selectCapitulo = document.getElementById('biblia-capitulo');
               
@@ -881,7 +882,8 @@
               atualizarCapitulos();          // Gera os 50 capítulos
               selectCapitulo.value = "1";    // Crava o capítulo 1
               
-              carregarCapitulo(); // Manda buscar o texto
+              carregarCapitulo(); // Puxa o texto do GitHub
+              primeiraVezBiblia = false; // Desliga a chave para não recarregar toda vez
           }
       }
 
@@ -894,14 +896,15 @@
 
       function iniciarBiblia() {
           const selectLivro = document.getElementById('biblia-livro'); 
-          if(selectLivro.options.length > 0) return; // Evita recarregar a lista
+          if(selectLivro.options.length > 0) return; // Evita duplicar os livros
 
-          // Preenche a lista de forma nativa e segura
-          selectLivro.options.length = 0; 
+          // Usando document.createElement igual ao Painel do Líder (funciona em todos)
           dadosBiblia.forEach((livro, index) => {
-              let opt = new Option(livro.nome, livro.id);
-              if (index >= 39) opt.style.fontWeight = "bold"; // Novo Testamento em negrito
-              selectLivro.options.add(opt);
+              let option = document.createElement('option');
+              option.value = livro.id;
+              option.text = livro.nome;
+              if (index >= 39) option.style.fontWeight = "bold"; // Novo Testamento
+              selectLivro.appendChild(option);
           });
       }
 
@@ -909,12 +912,15 @@
           const selectLivro = document.getElementById('biblia-livro');
           const selectCapitulo = document.getElementById('biblia-capitulo');
           
-          selectCapitulo.options.length = 0; // Limpa os capítulos anteriores
+          selectCapitulo.innerHTML = ''; // Limpa os capítulos anteriores
           
-          const livro = dadosBiblia.find(l => l.id === selectLivro.value);
-          if (livro) {
-              for (let i = 1; i <= livro.caps; i++) {
-                  selectCapitulo.options.add(new Option(i, i));
+          const livroEscolhido = dadosBiblia.find(l => l.id === selectLivro.value);
+          if (livroEscolhido) {
+              for (let i = 1; i <= livroEscolhido.caps; i++) {
+                  let option = document.createElement('option');
+                  option.value = i; 
+                  option.text = i; 
+                  selectCapitulo.appendChild(option);
               }
               selectCapitulo.disabled = false;
           }
