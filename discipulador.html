@@ -843,10 +843,26 @@
           { id: "3joao", nome: "3 João", caps: 1 }, { id: "judas", nome: "Judas", caps: 1 }, { id: "apocalipse", nome: "Apocalipse", caps: 22 }
       ];
 
-      function abrirBiblia() {
+      async function abrirBiblia() {
           document.getElementById('painel-biblia').classList.add('aberto');
-          const overlay = document.getElementById('biblia-overlay'); overlay.style.display = 'block'; setTimeout(() => overlay.style.opacity = '1', 10);
-          iniciarBiblia(); 
+          const overlay = document.getElementById('biblia-overlay'); 
+          overlay.style.display = 'block'; 
+          setTimeout(() => overlay.style.opacity = '1', 10);
+          
+          iniciarBiblia(); // Preenche a lista de livros
+
+          // NOVO: Seleciona Gênesis e carrega o Cap 1 automaticamente se estiver vazio
+          const selectLivro = document.getElementById('biblia-livro');
+          const conteudo = document.getElementById('biblia-conteudo');
+
+          // Se for a primeira vez que abre (conteúdo padrão), carrega Gênesis 1
+          if (conteudo.innerText.includes("Selecione o livro")) {
+              selectLivro.value = "genesis";
+              atualizarCapitulos(); // Preenche os capítulos de Gênesis
+              document.getElementById('biblia-capitulo').value = "1"; // Seleciona o 1
+              carregarCapitulo(); // Busca no GitHub
+          }
+      }
       }
 
       function fecharBiblia() {
@@ -855,13 +871,20 @@
       }
 
       function iniciarBiblia() {
-          const selectLivro = document.getElementById('biblia-livro'); if(selectLivro.options.length > 0) return;
+          const selectLivro = document.getElementById('biblia-livro'); 
+          // Só preenche se o select estiver vazio
+          if(selectLivro.options.length > 1) return; 
+
           selectLivro.innerHTML = '<option value="">Selecione o Livro</option>';
           dadosBiblia.forEach((livro, index) => {
-              let opt = document.createElement('option'); opt.value = livro.id; opt.text = livro.nome;
+              let opt = document.createElement('option'); 
+              opt.value = livro.id; 
+              opt.text = livro.nome;
+              // Destaca o Novo Testamento (Mateus em diante)
               if (index >= 39) opt.style.fontWeight = "bold"; 
               selectLivro.appendChild(opt);
           });
+      }
       }
 
      function atualizarCapitulos() {
