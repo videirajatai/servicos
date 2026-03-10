@@ -741,10 +741,13 @@
                 nascimento: this.nascimento.value || null, 
                 telefone: this.telefone.value, 
                 celula: this.celula.value, 
-                tipo: this.categoria.value, // <-- Corrigido de 'categoria' para 'tipo'
+                tipo: this.categoria.value, 
                 batizado: this.batizado.checked ? "Sim" : "Não", 
-                dizimista: this.dizimista.checked ? "Sim" : "Não", 
-                cursao: "Não", ctl: "Não", encontro: "Não", arquivado: "Não"
+                cursao: this.cursao.checked ? "Sim" : "Não", 
+                ctl: this.ctl.checked ? "Sim" : "Não", 
+                encontro: this.encontro.checked ? "Sim" : "Não", 
+                dizimista: "Não", // Removido o uso do dizimista, setando como Não padrão
+                arquivado: "Não"
             }; 
 
             try { 
@@ -757,7 +760,7 @@
             } catch(err) {
                 console.error(err); alert("Erro ao salvar membro.");
             } finally {
-                btn.innerText = "Salvar"; btn.disabled = false;
+                btn.innerText = "Salvar Membro"; btn.disabled = false;
             }
         };
     }
