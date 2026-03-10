@@ -300,7 +300,10 @@
      </div>
   </div>
 
-  <script>
+ <script>
+
+
+   
     // ==========================================
     // CONFIGURAÇÃO SUPABASE
     // ==========================================
@@ -311,37 +314,33 @@
     let dadosFinanceiros = [];
     let dadosMembros = [];
 
-    // Inicia a página com a data de hoje e carrega os dados
+    // Inicia a página e carrega os dados
     window.onload = function() {
-        const hoje = new Date();
-        const campoData = document.getElementById('finData'); 
-        if(campoData) campoData.valueAsDate = hoje;
-        
-        const filtroMes = document.getElementById('filtroMesFin'); 
-        if(filtroMes) filtroMes.value = hoje.toISOString().slice(0, 7);
-
         carregarTudo();
     };
 
     // ==========================================
-    // NAVEGAÇÃO DAS ABAS (O ERRO ESTAVA AQUI)
+    // NAVEGAÇÃO DAS ABAS (CORRIGIDO PARA O SEU HTML)
     // ==========================================
-    function nav(secao) {
-        // Esconde todas as abas
-        document.getElementById('tab-lancamento').classList.add('hidden');
-        document.getElementById('tab-extrato').classList.add('hidden');
-        document.getElementById('tab-dizimistas').classList.add('hidden');
-        
-        // Remove a cor escura dos botões
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        
-        // Mostra a aba clicada e pinta o botão
-        document.getElementById('tab-' + secao).classList.remove('hidden');
-        document.getElementById('btn-' + secao).classList.add('active');
+    function nav(idAba, botaoClicado) {
+        // Esconde todas as divs de conteúdo
+        document.querySelectorAll('.tab-content').forEach(aba => {
+            aba.style.display = 'none';
+        });
+
+        // Remove a cor do botão ativo
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Mostra a aba que foi clicada e pinta o botão
+        const abaParaMostrar = document.getElementById(idAba);
+        if (abaParaMostrar) abaParaMostrar.style.display = 'block';
+        if (botaoClicado) botaoClicado.classList.add('active');
     }
 
     // ==========================================
-    // CARREGAR DADOS E "TRADUZIR" PARA A TELA
+    // CARREGAR DADOS DO SUPABASE
     // ==========================================
     async function carregarTudo() {
         try {
@@ -350,7 +349,7 @@
                 supabaseClient.from('membros').select('*').order('nome', { ascending: true })
             ]);
 
-            // TRADUÇÃO: Transforma o objeto do Supabase num Array para a tela conseguir ler
+            // Transforma os Objetos do Supabase em Arrays para a sua tela ler perfeitamente
             dadosFinanceiros = finData ? finData.map(f => [
                 f.data || '', f.tipo || '', f.categoria || '', f.descricao || '', f.valor || 0, f.metodo || '', f.id
             ]) : [];
@@ -359,37 +358,42 @@
                 m.id, m.nome || 'Sem Nome', m.tipo || 'Membro', m.celula || '', m.telefone || '', '', m.batizado || 'Não', m.cursao || 'Não', m.ctl || 'Não', m.dizimista || 'Não', m.nascimento || ''
             ]) : [];
 
-            // Dispara as funções para desenhar na tela
+            // Dispara as funções para desenhar as tabelas na tela
             renderizarFinanceiro();
             preencherSelects(dadosMembros);
             renderizarDizimistas(dadosMembros);
 
         } catch(e) {
-            console.error("Erro ao carregar:", e);
+            console.error("Erro ao carregar do banco de dados:", e);
         }
     }
 
     // ==========================================
-    // RENDERIZAR TABELA E GRÁFICOS (DASHBOARD)
+    // RENDERIZAR TABELA EXTRATO E DASHBOARD
     // ==========================================
     function renderizarFinanceiro() {
+        // Procura a tabela usando os IDs possíveis do seu financeiro.html
         const corpo = document.getElementById('tbHistorico') || document.getElementById('corpoFin'); 
         if(corpo) corpo.innerHTML = ''; 
         
         let ent = 0, sai = 0;
-        const inputMes = document.getElementById('filtroMesFin');
-        const mesFiltro = inputMes ? inputMes.value : new Date().toISOString().slice(0, 7);
+        
+        // Pega o filtro de mês. Se não tiver filtro na tela, usa o mês atual.
+        const inputMes = document.getElementById('filtroMesFin') || document.getElementById('mesFiltro');
+        const mesAtual = new Date().toISOString().slice(0, 7);
+        const mesFiltro = inputMes && inputMes.value ? inputMes.value : mesAtual;
+        
         const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); 
 
         dadosFinanceiros.forEach(l => { 
-            // Somatório para o Dashboard (apenas do mês selecionado)
+            // Somatório para o Dashboard (apenas do mês que você está visualizando)
             if(l[0].startsWith(mesFiltro)) {
                 let v = parseFloat(l[4] || 0); 
                 if(l[1] === 'Entrada') ent += v; else sai += v; 
             }
 
-            // Monta as linhas da tabela Extrato
-            if(corpo && l[0].startsWith(mesFiltro)) {
+            // Monta as linhas da tabela Extrato (Mostra tudo se não tiver filtro, ou filtra pelo mês)
+            if(corpo) {
                 let cor = l[1] === 'Entrada' ? 'var(--success-text)' : 'var(--danger-text)'; 
                 let dataBr = l[0] ? l[0].split('-').reverse().join('/') : '';
                 corpo.innerHTML += `
@@ -406,26 +410,27 @@
             }
         }); 
 
-        // Pinta os valores nos Cards
+        // Pinta os valores nos Cards lá de cima
         const saldo = ent - sai;
-        if(document.getElementById('finSaldo')) document.getElementById('finSaldo').innerText = fmt(saldo); 
-        if(document.getElementById('finEntrada')) document.getElementById('finEntrada').innerText = fmt(ent); 
-        if(document.getElementById('finSaida')) document.getElementById('finSaida').innerText = fmt(sai); 
-    }
+        
+        // Procura os cards usando classes ou IDs
+        const cardSaldo = document.getElementById('finSaldo') || document.getElementById('valSaldo');
+        const cardEntrada = document.getElementById('finEntrada') || document.getElementById('valEntradas');
+        const cardSaida = document.getElementById('finSaida') || document.getElementById('valSaidas');
 
-    // Atualiza a tabela quando o usuário muda o mês no filtro
-    if(document.getElementById('filtroMesFin')) {
-        document.getElementById('filtroMesFin').addEventListener('change', renderizarFinanceiro);
+        if(cardSaldo) cardSaldo.innerText = fmt(saldo); 
+        if(cardEntrada) cardEntrada.innerText = fmt(ent); 
+        if(cardSaida) cardSaida.innerText = fmt(sai); 
     }
 
     // ==========================================
-    // LÓGICA DO FORMULÁRIO E SELECTS
+    // REGRAS DO FORMULÁRIO (DÍZIMO E OFERTA)
     // ==========================================
     function atualizarCategorias() { 
-        const t = document.getElementById('finTipo').value; 
-        const c = document.getElementById('finCategoria'); 
-        if(c) {
-            c.innerHTML = t === 'Saída' 
+        const t = document.getElementById('finTipo') || document.querySelector('[name="tipo"]'); 
+        const c = document.getElementById('finCategoria') || document.querySelector('[name="categoria"]'); 
+        if(c && t) {
+            c.innerHTML = t.value === 'Saída' 
                 ? '<option value="Despesa Fixa">Despesa Fixa</option><option value="Eventual">Eventual</option><option value="Manutenção">Manutenção</option>' 
                 : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>'; 
             atualizarCampos(); 
@@ -433,22 +438,23 @@
     }
     
     function atualizarCampos() { 
-        const t = document.getElementById('finTipo').value;
-        const c = document.getElementById('finCategoria').value;
-        const m = document.getElementById('finMembroSelect');
-        const d = document.getElementById('finDescricaoInput'); 
+        const t = document.getElementById('finTipo') || document.querySelector('[name="tipo"]');
+        const c = document.getElementById('finCategoria') || document.querySelector('[name="categoria"]');
+        const d = document.getElementById('finDescricaoInput') || document.querySelector('[name="descricao"]'); 
+        // Se houver um select de membro:
+        const m = document.getElementById('finMembroSelect') || document.querySelector('[name="membro"]');
         
-        if(t === 'Entrada' && c === 'Dízimo') { 
-            if(m) m.classList.remove('hidden'); 
-            if(d) d.classList.add('hidden'); 
+        if(t && c && t.value === 'Entrada' && c.value === 'Dízimo') { 
+            if(m) m.style.display = 'block'; 
+            if(d) d.style.display = 'none'; 
         } else { 
-            if(m) m.classList.add('hidden'); 
-            if(d) d.classList.remove('hidden'); 
+            if(m) m.style.display = 'none'; 
+            if(d) d.style.display = 'block'; 
         } 
     }
 
     function preencherSelects(lista) {
-        const s = document.getElementById('finMembroSelect'); 
+        const s = document.getElementById('finMembroSelect') || document.querySelector('[name="membro"]'); 
         if(!s) return;
         s.innerHTML = '<option value="">Selecione o Membro...</option>'; 
         let nomes = lista.map(i => i[1]).sort((a,b)=>a.localeCompare(b));
@@ -489,24 +495,36 @@
         }
     }
 
+    function filtrarHistorico() { 
+        let t = document.getElementById('buscaHist').value.toLowerCase(); 
+        let trs = document.getElementById('tbHistorico').getElementsByTagName('tr'); 
+        for(let tr of trs) {
+            tr.style.display = tr.innerText.toLowerCase().includes(t) ? '' : 'none'; 
+        }
+    }
+
     // ==========================================
     // SALVAR LANÇAMENTO FINANCEIRO
     // ==========================================
-    const formFin = document.getElementById('formFinanceiro') || document.getElementById('formLancamento');
+    const formFin = document.getElementById('formLancamento') || document.getElementById('formFinanceiro');
     if (formFin) {
         formFin.onsubmit = async function(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnSalvarFin') || this.querySelector('button[type="submit"]'); 
-            btn.disabled = true; btn.innerText = "Salvando...";
+            const btn = this.querySelector('button[type="submit"]'); 
+            if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
 
-            let desc = (this.tipo.value === 'Entrada' && this.categoria.value === 'Dízimo') ? this.membro.value : this.descricao.value; 
+            let tipoVal = this.tipo ? this.tipo.value : '';
+            let catVal = this.categoria ? this.categoria.value : '';
+            
+            let desc = (tipoVal === 'Entrada' && catVal === 'Dízimo' && this.membro) ? this.membro.value : this.descricao.value; 
+            
             const dados = {
-                tipo: this.tipo.value,
-                categoria: this.categoria.value,
+                tipo: tipoVal,
+                categoria: catVal,
                 descricao: desc,
                 valor: parseFloat(this.valor.value.replace(',', '.')),
                 data: this.data.value,
-                metodo: this.metodo.value
+                metodo: this.metodo ? this.metodo.value : 'Indefinido'
             };
 
             try {
@@ -514,14 +532,12 @@
                 registrarLogAcao(`Lançou ${dados.tipo} (${dados.categoria}): ${dados.descricao} - R$ ${dados.valor}`);
                 alert("Lançamento salvo com sucesso!");
                 this.reset();
-                document.getElementById('finData').valueAsDate = new Date();
-                atualizarCategorias();
                 carregarTudo(); 
             } catch(error) {
                 console.error(error);
                 alert("Erro ao salvar lançamento.");
             } finally {
-                btn.disabled = false; btn.innerText = "Registrar Movimentação";
+                if(btn) { btn.disabled = false; btn.innerText = "Registrar Movimentação"; }
             }
         };
     }
