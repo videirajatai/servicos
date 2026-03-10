@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
       .container { max-width: 800px; margin: 0 auto; padding: 15px; }
 
@@ -110,7 +112,7 @@
           </select>
 
           <div style="display:flex; gap:10px; margin-top: 15px;">
-             <button type="button" onclick="mudarSecao('usuarios')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px;">Cancelar</button>
+             <button type="button" onclick="mudarSecao('usuarios')" style="flex:1; background:#eee; color:#555; border:none; border-radius:8px; cursor: pointer;">Cancelar</button>
              <button type="submit" id="btnSalvarUsuario" class="btn-save" style="flex:2;">Salvar Usuário</button>
           </div>
         </form>
@@ -129,23 +131,16 @@
     </div>
 
     <script>
-      const API_URL = sessionStorage.getItem('urlApi');
+      // ==========================================
+      // CONFIGURAÇÃO SUPABASE
+      // ==========================================
+      const supabaseUrl = 'https://ryvfogmfpjyamgqsltks.supabase.co';
+      const supabaseKey = 'sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q';
+      const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
       let dadosUsuarios = [];
 
       window.onload = carregarTudo;
-
-      async function fetchGoogle(action, payload = {}) {
-        payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
-          try {
-              let res = await fetch(API_URL, {
-                  method: 'POST',
-                  body: JSON.stringify({ action: action, payload: payload })
-              });
-              let json = await res.json();
-              if (json.status === "sucesso") return json.dados || json.mensagem;
-              else throw new Error(json.mensagem);
-          } catch(e) { console.error("API Error:", e); alert("Erro: " + e.message); throw e; }
-      }
 
       function mudarSecao(s) {
          ['usuarios','form-usuario','logs'].forEach(id => document.getElementById('secao-'+id).classList.add('hidden'));
@@ -157,15 +152,18 @@
       async function carregarTudo() {
          const icon = document.getElementById('iconRefresh'); if(icon) icon.classList.add('fa-spin');
          try {
-             const [users, logs] = await Promise.all([
-                 fetchGoogle('buscarUsuarios'),
-                 fetchGoogle('buscarLogs')
+             // Busca usuários e logs ao mesmo tempo para carregar mais rápido
+             const [ { data: users }, { data: logs } ] = await Promise.all([
+                 supabaseClient.from('usuarios').select('*').order('nome', { ascending: true }),
+                 supabaseClient.from('log').select('*').order('id', { ascending: false }).limit(100) // Limita os últimos 100 logs
              ]);
-             dadosUsuarios = users;
-             renderizarUsuarios(users);
-             renderizarLogs(logs);
+
+             dadosUsuarios = users || [];
+             renderizarUsuarios(dadosUsuarios);
+             renderizarLogs(logs || []);
          } catch(e) {
-             console.log(e);
+             console.error(e);
+             alert("Erro ao carregar dados do servidor.");
          } finally {
              if(icon) icon.classList.remove('fa-spin');
          }
@@ -176,7 +174,7 @@
          if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center; color:#999;">Nenhum usuário encontrado.</p>'; return; }
          
          lista.forEach((u, index) => {
-             const user = u[0]; const senha = u[1]; const nome = u[2]; const cat = u[3];
+             const user = u.usuario; const nome = u.nome; const cat = u.categoria;
              div.innerHTML += `
              <div class="user-card">
                 <div class="user-info">
@@ -186,7 +184,7 @@
                 </div>
                 <div class="action-btns">
                    <button onclick="editarUsuario(${index})" class="btn-icon-action btn-edit"><i class="fas fa-pencil-alt"></i></button>
-                   <button onclick="excluirUsuario('${user}')" class="btn-icon-action btn-del"><i class="fas fa-trash-alt"></i></button>
+                   <button onclick="excluirUsuario('${u.id}', '${user}')" class="btn-icon-action btn-del"><i class="fas fa-trash-alt"></i></button>
                 </div>
              </div>`;
          });
@@ -197,7 +195,7 @@
          if(!lista || lista.length === 0) { div.innerHTML = '<p style="text-align:center; color:#999;">Nenhum registro encontrado.</p>'; return; }
          
          lista.forEach(l => {
-             let dataF = l[0]; let login = l[1]; let nome = l[2]; let acao = l[3];
+             let dataF = l.datahora; let login = l.usuario; let nome = l.nomelider; let acao = l.acao || "";
              let borderClass = acao.includes("Sucesso") ? "Sucesso" : "";
              div.innerHTML += `
              <div class="log-card ${borderClass}">
@@ -209,7 +207,7 @@
 
       function novoUsuario() {
          document.getElementById('formUsuario').reset();
-         document.getElementById('usuarioOriginal').value = "";
+         document.getElementById('usuarioOriginal').value = ""; // Limpa o ID
          document.getElementById('tituloFormUsuario').innerText = "Novo Usuário";
          document.getElementById('cadUsuario').readOnly = false; // Permite digitar o login
          mudarSecao('form-usuario');
@@ -217,12 +215,12 @@
 
       function editarUsuario(index) {
          const u = dadosUsuarios[index];
-         document.getElementById('usuarioOriginal').value = u[0]; // Guarda a chave
-         document.getElementById('cadUsuario').value = u[0];
+         document.getElementById('usuarioOriginal').value = u.id; // Guarda o ID do Supabase
+         document.getElementById('cadUsuario').value = u.usuario;
          document.getElementById('cadUsuario').readOnly = true; // Impede mudar o login na edição
-         document.getElementById('cadSenha').value = u[1];
-         document.getElementById('cadNome').value = u[2];
-         document.getElementById('cadCategoria').value = u[3];
+         document.getElementById('cadSenha').value = u.senha;
+         document.getElementById('cadNome').value = u.nome;
+         document.getElementById('cadCategoria').value = u.categoria;
          
          document.getElementById('tituloFormUsuario').innerText = "Editar Usuário";
          mudarSecao('form-usuario');
@@ -232,8 +230,8 @@
          e.preventDefault();
          const btn = document.getElementById('btnSalvarUsuario'); btn.disabled = true; btn.innerText = "Salvando...";
          
+         const idUsuario = this.usuarioOriginal.value;
          const d = {
-            usuarioOriginal: this.usuarioOriginal.value,
             usuario: this.usuario.value.trim().toLowerCase(),
             senha: this.senha.value.trim(),
             nome: this.nome.value,
@@ -241,32 +239,71 @@
          };
 
          try {
-             const res = await fetchGoogle('salvarUsuario', d);
-             alert(res);
+             if (idUsuario) {
+                 // Atualizar usuário existente
+                 await supabaseClient.from('usuarios').update(d).eq('id', idUsuario);
+                 registrarLogAcao(`Editou o acesso do usuário: ${d.usuario}`);
+                 alert("Usuário atualizado com sucesso!");
+             } else {
+                 // Criar novo usuário
+                 await supabaseClient.from('usuarios').insert([d]);
+                 registrarLogAcao(`Criou um novo usuário: ${d.usuario}`);
+                 alert("Usuário criado com sucesso!");
+             }
+             
              mudarSecao('usuarios');
              carregarTudo();
+         } catch(error) {
+             console.error("Erro ao salvar:", error);
+             alert("Erro ao salvar o usuário. Verifique se o login já existe.");
          } finally {
              btn.disabled = false; btn.innerText = "Salvar Usuário";
          }
       };
 
-      async function excluirUsuario(usuario) {
-         if(usuario === "admin") { alert("Não é possível excluir o Administrador principal."); return; }
+      async function excluirUsuario(id, usuario) {
+         if(usuario === "admin" || usuario === "administrador") { alert("Não é possível excluir o Administrador principal."); return; }
+         
          if(confirm(`Tem certeza que deseja EXCLUIR o acesso de '${usuario}'?`)) {
              try {
-                 const res = await fetchGoogle('excluirUsuario', { usuario: usuario });
-                 alert(res); carregarTudo();
-             } catch(e) {}
+                 await supabaseClient.from('usuarios').delete().eq('id', id);
+                 registrarLogAcao(`Excluiu o usuário: ${usuario}`);
+                 alert("Usuário excluído com sucesso!");
+                 carregarTudo();
+             } catch(e) {
+                 alert("Erro ao excluir usuário.");
+             }
          }
       }
 
       async function limparLogs() {
          if(confirm("ATENÇÃO: Deseja apagar todo o histórico de logs do sistema? Esta ação não pode ser desfeita.")) {
              try {
-                 const res = await fetchGoogle('limparLogs');
-                 alert(res); carregarTudo();
-             } catch(e) {}
+                 // Exclui todos os logs (onde a datahora não é nula)
+                 await supabaseClient.from('log').delete().not('datahora', 'is', null);
+                 registrarLogAcao("Limpou o histórico de logs do sistema.");
+                 alert("Logs apagados com sucesso!");
+                 carregarTudo();
+             } catch(e) {
+                 alert("Erro ao limpar os logs.");
+             }
          }
+      }
+
+      // FUNÇÃO PARA REGISTRAR AS AÇÕES DO ADMIN NO LOG
+      async function registrarLogAcao(acaoRealizada) {
+         const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+         const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+         const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+         
+         try {
+             await supabaseClient.from('log').insert([{ 
+                 datahora: dataHoraAtual, 
+                 usuario: user, 
+                 nomelider: nomeReal, 
+                 acao: acaoRealizada 
+             }]);
+         } catch (e) { console.error("Erro ao salvar o log:", e); }
       }
     </script>
   </body>
