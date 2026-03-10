@@ -639,7 +639,7 @@
             dadosMembros = memData ? memData.map(m => [
                 m.id, 
                 m.nome || 'Sem Nome', 
-                m.categoria || 'Membro', 
+                m.tipo || 'Membro', 
                 m.celula || 'Sem Célula', 
                 m.telefone || '', 
                 m.tipo || '',       
@@ -845,7 +845,7 @@
           const d = { 
               nome: this.nome.value, 
               nascimento: this.nascimento.value || null, 
-              categoria: this.categoria.value, 
+              tipo: this.categoria.value, 
               celula: this.celula.value, 
               telefone: this.telefone.value, 
               batizado: this.batizado.checked ? "Sim" : "Não", 
