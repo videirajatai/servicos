@@ -33,12 +33,14 @@
         input[type="text"], input[type="password"] {
             width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px;
             font-size: 15px; color: var(--text-main); outline: none; transition: 0.3s; background-color: var(--input-bg);
+            box-sizing: border-box;
         }
         input[type="text"]:focus, input[type="password"]:focus { border-color: var(--primary); background-color: #ffffff; }
 
         button {
             width: 100%; padding: 16px; margin-top: 10px; background-color: var(--primary); color: #ffffff;
             border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s;
+            box-sizing: border-box;
         }
         button:hover { background-color: #600018; transform: translateY(-1px); }
         button:disabled { background-color: #a0aec0; cursor: not-allowed; }
@@ -96,11 +98,16 @@
     </div>
 
     <script>
+        // MANTER O BACKEND DO GOOGLE PARA A AGENDA
         const urlBackend = "https://script.google.com/macros/s/AKfycbxnystn3UqAKnfLUgw7tXS8CzrnpxTS0iax80rhMCRs-T47ibodGYvbRw2KRrtsnCzn/exec"; 
         
+        // DADOS DO SUPABASE PARA O LOGIN
+        const SB_URL = "https://ryvfogmfpjyamgqsltks.supabase.co"; 
+        const SB_KEY = "sb_publishable_nFMOC-fPkJnsmf5_noOTBg_tKV6Cr1q";
+
         async function verificarLogin() {
             const user = document.getElementById('usuario-input').value.trim().toLowerCase();
-            const pass = document.getElementById('senha-input').value;
+            const pass = document.getElementById('senha-input').value.trim();
             const erro = document.getElementById('mensagem-erro');
             const btn = document.getElementById('btn-entrar');
             
@@ -109,44 +116,76 @@
             btn.innerText = "Autenticando..."; btn.disabled = true; erro.style.display = 'none';
 
             try {
-                let resposta = await fetch(urlBackend, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "login", payload: { usuario: user, senha: pass } })
+                // Consulta no Supabase validando usuário e senha diretamente no banco
+                let resposta = await fetch(`${SB_URL}/rest/v1/usuarios?usuario=eq.${encodeURIComponent(user)}&senha=eq.${encodeURIComponent(pass)}&select=*`, {
+                    method: 'GET',
+                    headers: {
+                        'apikey': SB_KEY,
+                        'Authorization': `Bearer ${SB_KEY}`
+                    }
                 });
                 
+                // Se a senha for digitada com letras (e a coluna for int8), o Supabase retorna erro 400. Tratamos isso.
+                if (!resposta.ok) throw new Error("Credenciais inválidas");
+
                 let resultado = await resposta.json();
 
-                if (resultado.status === "sucesso") {
+                // Se encontrou 1 usuário correspondente
+                if (resultado && resultado.length > 0) {
+                    const dadosUsuario = resultado[0];
+                    const nomeReal = dadosUsuario.nome;
+                    const categoria = (dadosUsuario.categoria || "").toLowerCase();
+
+                    // Mapeia quais painéis o usuário pode acessar baseado na sua Categoria
+                    let paginas = [];
+                    if (categoria === 'pastor' || categoria === 'admin') {
+                        paginas = [
+                            { nome: "Painel do Pastor", url: "pastor" },
+                            { nome: "Painel Discipulador", url: "discipulador" },
+                            { nome: "Painel do Líder", url: "lider" }
+                        ];
+                    } else if (categoria === 'discipulador') {
+                        paginas = [
+                            { nome: "Painel Discipulador", url: "discipulador" },
+                            { nome: "Painel do Líder", url: "lider" }
+                        ];
+                    } else {
+                        // Se for líder ou qualquer outra coisa não mapeada, cai no painel base
+                        paginas = [
+                            { nome: "Painel do Líder", url: "lider" }
+                        ];
+                    }
                     
-                    // Salva os dados de sessão, incluindo a lista de URLs permitidas!
-                    sessionStorage.setItem('usuarioLogado', resultado.nome);
-                    sessionStorage.setItem('tokenAcesso', resultado.token);
+                    // Salva os dados de sessão (inclusive a URL do Google pra agenda continuar funcionando)
+                    sessionStorage.setItem('usuarioLogado', nomeReal);
                     sessionStorage.setItem('urlApi', urlBackend);
                     
-                    const urlsPermitidas = resultado.paginas.map(p => p.url);
+                    const urlsPermitidas = paginas.map(p => p.url);
                     sessionStorage.setItem('paginasPermitidas', JSON.stringify(urlsPermitidas));
 
-                    if (resultado.paginas.length === 1) {
+                    // Redirecionamento ou Tela de Escolha
+                    if (paginas.length === 1) {
                         // Se tem só 1 permissão, pula o menu de escolha e vai direto
-                        entrarNoPainel(resultado.nome, resultado.paginas[0].url);
+                        entrarNoPainel(nomeReal, paginas[0].url);
                     } else {
                         // Se tem mais de 1, exibe os botões para ele escolher
                         document.getElementById('area-form').style.display = 'none';
                         document.getElementById('area-escolha').style.display = 'block';
-                        document.getElementById('titulo-login').innerText = `Olá, ${resultado.nome}`;
+                        document.getElementById('titulo-login').innerText = `Olá, ${nomeReal}`;
                         document.getElementById('subtitulo-login').innerText = "Qual painel você deseja acessar?";
 
                         const divBotoes = document.getElementById('botoes-painel');
                         divBotoes.innerHTML = '';
-                        resultado.paginas.forEach(pag => {
+                        paginas.forEach(pag => {
                             let b = document.createElement('button');
                             b.innerText = pag.nome;
-                            b.onclick = () => entrarNoPainel(resultado.nome, pag.url);
+                            b.onclick = () => entrarNoPainel(nomeReal, pag.url);
                             divBotoes.appendChild(b);
                         });
                     }
                     
                 } else {
+                    // Array vazio = usuário ou senha não encontrados
                     erro.innerText = "⚠️ Usuário ou senha incorretos.";
                     erro.style.display = 'block';
                     document.getElementById('senha-input').value = "";
@@ -154,8 +193,10 @@
                     btn.innerText = "Entrar no Sistema"; btn.disabled = false;
                 }
             } catch (e) {
-                erro.innerText = "⚠️ Erro de conexão com o servidor.";
+                // Erro de internet ou erro de tipo de dado (int8 vs texto)
+                erro.innerText = "⚠️ Usuário ou senha incorretos.";
                 erro.style.display = 'block';
+                document.getElementById('senha-input').value = "";
                 btn.innerText = "Entrar no Sistema"; btn.disabled = false;
             }
         }
@@ -194,9 +235,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
