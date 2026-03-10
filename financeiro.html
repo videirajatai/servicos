@@ -287,15 +287,40 @@
      </div>
   </div>
   
-  <div id="modalMembro" class="modal-overlay hidden">
+<div id="modalMembro" class="modal-overlay hidden">
      <div class="modal-box">
-        <h3>Novo Membro</h3>
+        <h3 style="color:var(--primary); margin-top:0;">Cadastro de Membro</h3>
         <form id="formMembroCompleto">
-           <label>Nome</label><input type="text" name="nome" required>
-           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;"><div><label>Nascimento</label><input type="date" name="nascimento"></div><div><label>WhatsApp</label><input type="tel" name="telefone"></div></div>
-           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;"><div><label>Célula</label><select name="celula" id="modalSelectCelula" required></select></div><div><label>Categoria</label><select name="categoria"><option>Membro</option><option>Frequentador</option></select></div></div>
-           <label style="margin-top:10px;">Status</label><div style="display:flex; gap:10px;"><label><input type="checkbox" name="batizado"> Batizado</label><label><input type="checkbox" name="dizimista" checked> Dizimista</label></div>
-           <div style="display:flex; gap:10px; margin-top:20px;"><button type="button" onclick="document.getElementById('modalMembro').classList.add('hidden')" style="flex:1; padding:10px;">Cancelar</button><button type="submit" id="btnSalvarMembro" style="flex:1; padding:10px; background:var(--primary); color:white; border:none;">Salvar</button></div>
+           <label>Nome Completo</label>
+           <input type="text" name="nome" required placeholder="Ex: João da Silva">
+           
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+               <div><label>Nascimento</label><input type="date" name="nascimento"></div>
+               <div><label>WhatsApp</label><input type="tel" name="telefone" placeholder="(00) 00000-0000"></div>
+           </div>
+           
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+               <div><label>Célula</label><select name="celula" id="modalSelectCelula" required></select></div>
+               <div>
+                  <label>Categoria</label>
+                  <select name="categoria">
+                     <option>Membro</option><option>Frequentador</option><option>Líder</option><option>Discipulador</option><option>Pastor</option>
+                  </select>
+               </div>
+           </div>
+           
+           <label style="margin-top:15px; margin-bottom:10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Caminho Espiritual</label>
+           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 20px;">
+               <label style="display:flex; align-items:center; gap:8px; font-weight:normal; cursor:pointer;"><input type="checkbox" name="batizado" style="width:auto; margin:0;"> Batismo</label>
+               <label style="display:flex; align-items:center; gap:8px; font-weight:normal; cursor:pointer;"><input type="checkbox" name="cursao" style="width:auto; margin:0;"> Cursão</label>
+               <label style="display:flex; align-items:center; gap:8px; font-weight:normal; cursor:pointer;"><input type="checkbox" name="ctl" style="width:auto; margin:0;"> CTL</label>
+               <label style="display:flex; align-items:center; gap:8px; font-weight:normal; cursor:pointer;"><input type="checkbox" name="encontro" style="width:auto; margin:0;"> Encontro</label>
+           </div>
+           
+           <div style="display:flex; gap:10px; margin-top:15px;">
+               <button type="button" onclick="document.getElementById('modalMembro').classList.add('hidden')" style="flex:1; padding:12px; background:#eee; color:#555; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Cancelar</button>
+               <button type="submit" id="btnSalvarMembro" style="flex:2; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Salvar Membro</button>
+           </div>
         </form>
      </div>
   </div>
