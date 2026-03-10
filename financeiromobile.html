@@ -614,6 +614,7 @@
           const campoData = document.getElementById('finData'); if(campoData) campoData.valueAsDate = hoje;
           const filtroMes = document.getElementById('filtroMesFin'); if(filtroMes) filtroMes.value = hoje.toISOString().slice(0, 7);
           carregarTudo();
+          mudarSecao('financeiro');
       }
 
       // Função original mantida estritamente para a Agenda/Integrações não modificadas
