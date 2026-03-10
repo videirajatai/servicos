@@ -767,7 +767,15 @@
           if (p[3] && p[3].trim() !== "") { btn.href = p[3]; btn.classList.remove('hidden'); } else { btn.classList.add('hidden'); }
           document.getElementById('modalPalavra').classList.remove('hidden');
       }
-      function novaPalavra() { document.getElementById('formPalavra').reset(); document.getElementById('palavraData').valueAsDate = new Date(); mudarSecao('nova-palavra'); }
+      function novaPalavra() { document.getElementById('formPalavra').onsubmit = async function(e) {
+          e.preventDefault(); const btn = document.getElementById('btnSalvarPalavra'); btn.disabled = true; btn.innerText = "Salvando...";
+          try {
+              const dados = { data: this.data.value, tema: this.tema.value, texto: this.texto.value, link_youtube: this.link.value };
+              await supabaseClient.from('palavras').insert([dados]);
+              registrarLogAcao(`Publicou a palavra/estudo: ${dados.tema}`); // LOG
+              alert("Publicado com sucesso!"); carregarPalavras();
+          } finally { btn.disabled = false; btn.innerText = "Publicar"; }
+      };
       function fecharModal(e) { if(e === null || e.target.id === 'modalPalavra') document.getElementById('modalPalavra').classList.add('hidden'); }
       
       document.getElementById('formPalavra').onsubmit = async function(e) {
@@ -899,6 +907,7 @@
           const d = { tipo: this.tipo.value, categoria: this.categoria.value, descricao: desc, valor: this.valor.value, data: this.data.value, metodo: this.metodo.value }; 
           try {
               await supabaseClient.from('financeiro').insert([d]);
+              registrarLogAcao(`Lançou ${this.tipo.value} no financeiro: ${desc} (R$ ${this.valor.value})`); // LOG
               alert("Registrado!"); this.reset(); document.getElementById('finData').valueAsDate = new Date(); 
               carregarFinanceiro(); atualizarCategorias(); 
           } finally { btn.disabled=false; btn.innerText="Registrar Movimentação"; }
@@ -914,21 +923,21 @@
           e.preventDefault(); const id = document.getElementById('idMembro').value; const btn = document.getElementById('btnSalvar'); btn.disabled=true; btn.innerText="Salvando...";
           
           const d = { 
-              nome: this.nome.value, 
-              nascimento: this.nascimento.value || null, 
-              tipo: this.categoria.value, 
-              celula: this.celula.value, 
-              telefone: this.telefone.value, 
-              batizado: this.batizado.checked ? "Sim" : "Não", 
-              cursao: this.cursao.checked ? "Sim" : "Não", 
-              ctl: this.ctl.checked ? "Sim" : "Não", 
-              encontro: this.encontro.checked ? "Sim" : "Não", 
-              arquivado: "Não" // <-- Passando a gravar "Não" em formato de texto
+              nome: this.nome.value, nascimento: this.nascimento.value || null, tipo: this.categoria.value, 
+              celula: this.celula.value, telefone: this.telefone.value, 
+              batizado: this.batizado.checked ? "Sim" : "Não", cursao: this.cursao.checked ? "Sim" : "Não", 
+              ctl: this.ctl.checked ? "Sim" : "Não", encontro: this.encontro.checked ? "Sim" : "Não", 
+              arquivado: "Não" 
           }; 
           
           try { 
-              if(id) await supabaseClient.from('membros').update(d).eq('id', id);
-              else await supabaseClient.from('membros').insert([d]);
+              if(id) {
+                  await supabaseClient.from('membros').update(d).eq('id', id);
+                  registrarLogAcao(`Editou o membro: ${d.nome}`); // LOG
+              } else {
+                  await supabaseClient.from('membros').insert([d]);
+                  registrarLogAcao(`Cadastrou novo membro: ${d.nome}`); // LOG
+              }
               mudarSecao('lista'); carregarTudo(); 
           } finally { btn.disabled=false; btn.innerText="Salvar"; }
       };
@@ -966,48 +975,43 @@
       function editarCelula(index) { const c = dadosCelulas[index]; if(!c) return; document.getElementById('nomeOriginalCelula').value = c[0]; document.getElementById('celNome').value = c[0]; document.getElementById('celDia').value = c[2]; document.getElementById('celEndereco').value = c[3]; const s = document.getElementById('celLider'); s.innerHTML = '<option value="">Selecione...</option>'; lideres.forEach(l => { let opt = document.createElement('option'); opt.value = l; opt.text = l; if(l === c[1]) opt.selected = true; s.appendChild(opt); }); document.getElementById('tituloFormCelula').innerText = "Editar Célula"; mudarSecao('form-celula'); }
       
       document.getElementById('formCelula').onsubmit = async function(e) { 
-          e.preventDefault(); 
-          const btn = document.getElementById('btnSalvarCelula'); 
-          btn.disabled = true; 
-          btn.innerText = "Salvando...";
-          
-          // Pegando os valores DIRETAMENTE pelos IDs do HTML (à prova de falhas)
+          e.preventDefault(); const btn = document.getElementById('btnSalvarCelula'); btn.disabled = true; btn.innerText = "Salvando...";
           const nomeOrig = document.getElementById('nomeOriginalCelula').value;
           
           const dados = { 
-              nome: document.getElementById('celNome').value, 
-              lider: document.getElementById('celLider').value, 
-              dia_horario: document.getElementById('celDia').value, // Lê do id "celDia" e salva em "dia_horario"
-              endereco: document.getElementById('celEndereco').value 
+              nome: document.getElementById('celNome').value, lider: document.getElementById('celLider').value, 
+              dia_horario: document.getElementById('celDia').value, endereco: document.getElementById('celEndereco').value 
           }; 
           
           try { 
               if (nomeOrig) {
                   await supabaseClient.from('celulas').update(dados).eq('nome', nomeOrig);
+                  registrarLogAcao(`Editou a célula: ${dados.nome}`); // LOG
               } else {
                   await supabaseClient.from('celulas').insert([dados]);
+                  registrarLogAcao(`Cadastrou nova célula: ${dados.nome}`); // LOG
               }
-              
-              alert("Salvo com sucesso!"); 
-              mudarSecao('celulas'); 
-              carregarTudo(); 
-          } catch(err) {
-              console.error(err);
-              alert("Erro ao salvar a célula: " + err.message);
-          } finally { 
-              btn.disabled = false; 
-              btn.innerText = "Salvar"; 
-          }
+              alert("Salvo com sucesso!"); mudarSecao('celulas'); carregarTudo(); 
+          } catch(err) { console.error(err); alert("Erro ao salvar a célula: " + err.message); } 
+          finally { btn.disabled = false; btn.innerText = "Salvar"; }
       };
       
-     async function arquivar(id, n) { 
+     aasync function arquivar(id, n) { 
           if(confirm(`Arquivar ${n}?`)) { 
-              try{ await supabaseClient.from('membros').update({arquivado: 'Sim'}).eq('id', id); carregarTudo(); } catch(e){} 
+              try{ 
+                  await supabaseClient.from('membros').update({arquivado: 'Sim'}).eq('id', id); 
+                  registrarLogAcao(`Arquivou o membro: ${n}`); // LOG
+                  carregarTudo(); 
+              } catch(e){} 
           } 
       }
       async function restaurar(id) { 
           if(confirm("Restaurar?")) { 
-              try{ await supabaseClient.from('membros').update({arquivado: 'Não'}).eq('id', id); mudarSecao('lista'); carregarTudo(); } catch(e){} 
+              try{ 
+                  await supabaseClient.from('membros').update({arquivado: 'Não'}).eq('id', id); 
+                  registrarLogAcao(`Restaurou membro ID: ${id}`); // LOG
+                  mudarSecao('lista'); carregarTudo(); 
+              } catch(e){} 
           } 
       }
       function filtrarTabela(id) { const b = document.getElementById('inputBuscaArquivo').value.toLowerCase(); const rows = document.getElementById('corpoArquivo').getElementsByTagName('tr'); for(let r of rows) r.style.display = r.innerText.toLowerCase().includes(b)?'':'none'; }
@@ -1191,28 +1195,22 @@
       }
 
       // FUNÇÃO DE LOG GLOBAL PARA OS PAINÉIS
+      // FUNÇÃO DE LOG GLOBAL (CORRIGIDA PARA O PAINEL PASTORAL)
       async function registrarLogAcao(acaoRealizada) {
           const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
           const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
           const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
           
-          const dadosLog = {
-              datahora: dataHoraAtual,
-              usuario: user,
-              nomelider: nomeReal,
-              acao: acaoRealizada
-          };
-
           try {
-              await fetch(`${SB_URL}/rest/v1/log`, {
+              await fetch(`${supabaseUrl}/rest/v1/log`, {
                   method: 'POST',
                   headers: {
-                      'apikey': SB_KEY,
-                      'Authorization': `Bearer ${SB_KEY}`,
+                      'apikey': supabaseKey,
+                      'Authorization': `Bearer ${supabaseKey}`,
                       'Content-Type': 'application/json',
                       'Prefer': 'return=minimal'
                   },
-                  body: JSON.stringify(dadosLog)
+                  body: JSON.stringify({ datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada })
               });
           } catch (e) { console.error("Erro no log:", e); }
       }
