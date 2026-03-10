@@ -302,7 +302,7 @@
   <body>
     <script>
       const paginasPermitidas = JSON.parse(sessionStorage.getItem('paginasPermitidas') || "[]");
-      if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("pastor")) {
+      if(!sessionStorage.getItem('usuarioLogado') || !paginasPermitidas.includes("financeiromobile")) {
           window.location.href = "index.html";
       }
   </script>
