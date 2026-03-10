@@ -423,9 +423,20 @@
 
         try {
             listaPalavras = await lerSupabase('palavras');
-            listaPalavras.reverse(); 
+            
+            // Ordenação matemática pela data (do mais novo para o mais velho)
+            listaPalavras.sort((a, b) => {
+                const pegarTempo = (d) => {
+                    if (!d) return 0;
+                    if (d.includes('-')) { const p = d.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
+                    if (d.includes('/')) { const p = d.split('/'); return new Date(p[2], p[1]-1, p[0]).getTime(); }
+                    return new Date(d).getTime();
+                };
+                return pegarTempo(b.data) - pegarTempo(a.data);
+            });
+            
             renderizarPalavras(listaPalavras);
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Erro Palavras Supabase:", e); }
 
         if(icon) icon.classList.remove('fa-spin');
       }
