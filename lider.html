@@ -351,10 +351,25 @@
       window.onload = carregarTudo;
 
       // ==========================================
-      // MOTORES DE COMUNICAÇÃO
+      // MOTORES DE COMUNICAÇÃO (COM LOG AUTOMÁTICO)
       // ==========================================
       
-      // MOTOR GOOGLE SCRIPT (Apenas para a Agenda)
+      // 1. O MOTOR SILENCIOSO DE LOG
+      async function registrarLogAcao(acaoRealizada) {
+          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
+          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
+          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
+
+          try {
+              await fetch(`${SB_URL}/rest/v1/log`, {
+                  method: 'POST',
+                  headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                  body: JSON.stringify({ datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada })
+              });
+          } catch (e) { console.error("Erro no log:", e); }
+      }
+
+      // 2. MOTOR GOOGLE SCRIPT (Agenda)
       async function fetchGoogle(action, payload = {}) {
         payload.usuarioAtivo = sessionStorage.getItem('usuarioLogado');
           try {
@@ -363,7 +378,13 @@
                   body: JSON.stringify({ action: action, payload: payload })
               });
               let json = await res.json();
-              if (json.status === "sucesso") return json.dados || json.mensagem;
+              if (json.status === "sucesso") {
+                  // Rastreador automático da Agenda
+                  if (action === 'salvarAgenda') {
+                      registrarLogAcao(`Cadastrou evento na agenda: ${payload.descricao}`);
+                  }
+                  return json.dados || json.mensagem;
+              }
               else throw new Error(json.mensagem);
           } catch(e) {
               console.error("Erro na API Google:", e);
@@ -371,7 +392,7 @@
           }
       }
 
-      // MOTOR SUPABASE (Para o Resto)
+      // 3. MOTORES SUPABASE (Para o Resto)
       async function lerSupabase(tabela) {
           const res = await fetch(`${SB_URL}/rest/v1/${tabela}?select=*`, {
               method: 'GET',
@@ -387,11 +408,17 @@
               headers: { 
                   'apikey': SB_KEY, 
                   'Authorization': `Bearer ${SB_KEY}`,
-                  'Content-Type': 'application/json'
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal' 
               },
               body: JSON.stringify(dados)
           });
           if (!res.ok) throw new Error(`Erro ao salvar no Supabase. Verifique o RLS.`);
+          
+          // Rastreador automático para Membros, Relatórios e Sugestões
+          let identificador = dados.nome || dados.celula || "Mensagem/Sugestão";
+          registrarLogAcao(`Criou registro na aba ${tabela}: ${identificador}`);
+          
           return "Salvo com sucesso! 🚀";
       }
 
@@ -868,34 +895,6 @@
           } catch (e) {
               conteudo.innerHTML = `<p style="color: #dc3545; text-align: center;">Erro ao carregar o capítulo.</p>`;
           }
-      }
-
-      //////////////////////////////////////////////logs   ///////////////////////
-      // FUNÇÃO DE LOG GLOBAL PARA OS PAINÉIS
-      async function registrarLogAcao(acaoRealizada) {
-          const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
-          const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
-          const dataHoraAtual = new Date().toLocaleString('pt-BR'); 
-          
-          const dadosLog = {
-              datahora: dataHoraAtual,
-              usuario: user,
-              nomelider: nomeReal,
-              acao: acaoRealizada
-          };
-
-          try {
-              await fetch(`${SB_URL}/rest/v1/log`, {
-                  method: 'POST',
-                  headers: {
-                      'apikey': SB_KEY,
-                      'Authorization': `Bearer ${SB_KEY}`,
-                      'Content-Type': 'application/json',
-                      'Prefer': 'return=minimal'
-                  },
-                  body: JSON.stringify(dadosLog)
-              });
-          } catch (e) { console.error("Erro no log:", e); }
       }
     </script>
   </body>
