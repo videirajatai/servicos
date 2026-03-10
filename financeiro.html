@@ -300,10 +300,9 @@
      </div>
   </div>
 
- <script>
-
 
    
+    <script>
     // ==========================================
     // CONFIGURAÇÃO SUPABASE
     // ==========================================
@@ -313,43 +312,62 @@
 
     let dadosFinanceiros = [];
     let dadosMembros = [];
+    let meuGrafico = null; // Variável para o Chart.js
 
-    // Inicia a página e carrega os dados
+    // ==========================================
+    // INICIALIZAÇÃO
+    // ==========================================
     window.onload = function() {
+        // Seta o mês e ano atual nos filtros
+        const hoje = new Date();
+        document.getElementById('filtroMes').value = hoje.getMonth();
+        document.getElementById('filtroAno').value = hoje.getFullYear();
+        
+        // Seta data de hoje no form de lançamento
+        const inputData = document.getElementById('finData');
+        if(inputData) inputData.valueAsDate = hoje;
+
+        // Data do rodapé de impressão
+        document.getElementById('dataRodape').innerText = hoje.toLocaleDateString('pt-BR');
+
         carregarTudo();
     };
 
     // ==========================================
-    // NAVEGAÇÃO DAS ABAS (CORRIGIDO PARA O SEU HTML)
+    // NAVEGAÇÃO DA SIDEBAR
     // ==========================================
-    function nav(idAba, botaoClicado) {
-        // Esconde todas as divs de conteúdo
-        document.querySelectorAll('.tab-content').forEach(aba => {
-            aba.style.display = 'none';
+    function nav(secao, btn) {
+        // Esconde todas as views
+        ['dashboard', 'lancamento', 'historico', 'dizimistas'].forEach(id => {
+            const el = document.getElementById('view-' + id);
+            if(el) el.classList.add('hidden');
         });
 
-        // Remove a cor do botão ativo
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        // Remove classe active dos botões
+        document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
 
-        // Mostra a aba que foi clicada e pinta o botão
-        const abaParaMostrar = document.getElementById(idAba);
-        if (abaParaMostrar) abaParaMostrar.style.display = 'block';
-        if (botaoClicado) botaoClicado.classList.add('active');
+        // Mostra a view clicada
+        document.getElementById('view-' + secao).classList.remove('hidden');
+        if(btn) btn.classList.add('active');
+
+        // Atualiza a página e o título
+        document.getElementById('pageTitle').innerText = btn.innerText;
+        if(secao === 'dashboard') atualizarGrafico();
     }
 
     // ==========================================
-    // CARREGAR DADOS DO SUPABASE
+    // CARREGAR DADOS (SUPABASE)
     // ==========================================
     async function carregarTudo() {
+        const icon = document.getElementById('iconRefresh');
+        if(icon) icon.classList.add('fa-spin');
+
         try {
             const [ { data: finData }, { data: memData } ] = await Promise.all([
                 supabaseClient.from('financeiro').select('*').order('data', { ascending: false }),
                 supabaseClient.from('membros').select('*').order('nome', { ascending: true })
             ]);
 
-            // Transforma os Objetos do Supabase em Arrays para a sua tela ler perfeitamente
             dadosFinanceiros = finData ? finData.map(f => [
                 f.data || '', f.tipo || '', f.categoria || '', f.descricao || '', f.valor || 0, f.metodo || '', f.id
             ]) : [];
@@ -358,129 +376,216 @@
                 m.id, m.nome || 'Sem Nome', m.tipo || 'Membro', m.celula || '', m.telefone || '', '', m.batizado || 'Não', m.cursao || 'Não', m.ctl || 'Não', m.dizimista || 'Não', m.nascimento || ''
             ]) : [];
 
-            // Dispara as funções para desenhar as tabelas na tela
             renderizarFinanceiro();
-            preencherSelects(dadosMembros);
-            renderizarDizimistas(dadosMembros);
+            renderizarDizimistas();
+            atualizarGrafico();
 
         } catch(e) {
-            console.error("Erro ao carregar do banco de dados:", e);
+            console.error("Erro ao carregar:", e);
+        } finally {
+            if(icon) icon.classList.remove('fa-spin');
         }
     }
 
     // ==========================================
-    // RENDERIZAR TABELA EXTRATO E DASHBOARD
+    // RENDERIZAR DASHBOARD E HISTÓRICO
     // ==========================================
     function renderizarFinanceiro() {
-        // Procura a tabela usando os IDs possíveis do seu financeiro.html
-        const corpo = document.getElementById('tbHistorico') || document.getElementById('corpoFin'); 
+        const corpo = document.getElementById('tbHistorico'); 
         if(corpo) corpo.innerHTML = ''; 
         
-        let ent = 0, sai = 0;
+        let ent = 0, sai = 0, dizimos = 0, ofertas = 0, totalHist = 0;
         
-        // Pega o filtro de mês. Se não tiver filtro na tela, usa o mês atual.
-        const inputMes = document.getElementById('filtroMesFin') || document.getElementById('mesFiltro');
-        const mesAtual = new Date().toISOString().slice(0, 7);
-        const mesFiltro = inputMes && inputMes.value ? inputMes.value : mesAtual;
+        const mesFiltro = document.getElementById('filtroMes').value;
+        const anoFiltro = document.getElementById('filtroAno').value;
+        const padMes = (parseInt(mesFiltro) + 1).toString().padStart(2, '0');
+        const filtroAtivo = mesFiltro === "-1" ? anoFiltro : `${anoFiltro}-${padMes}`;
         
         const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'}); 
 
         dadosFinanceiros.forEach(l => { 
-            // Somatório para o Dashboard (apenas do mês que você está visualizando)
-            if(l[0].startsWith(mesFiltro)) {
-                let v = parseFloat(l[4] || 0); 
-                if(l[1] === 'Entrada') ent += v; else sai += v; 
+            let v = parseFloat(l[4] || 0); 
+            
+            // Cálculos do Dashboard (respeitando o filtro de Mês/Ano)
+            if(l[0].startsWith(filtroAtivo)) {
+                if(l[1] === 'Entrada') {
+                    ent += v;
+                    if(l[2] === 'Dízimo') dizimos += v;
+                    if(l[2] === 'Oferta') ofertas += v;
+                } else {
+                    sai += v; 
+                }
             }
 
-            // Monta as linhas da tabela Extrato (Mostra tudo se não tiver filtro, ou filtra pelo mês)
-            if(corpo) {
-                let cor = l[1] === 'Entrada' ? 'var(--success-text)' : 'var(--danger-text)'; 
+            // Tabela do Histórico
+            if(corpo && l[0].startsWith(filtroAtivo)) {
+                let isEntrada = l[1] === 'Entrada';
+                let cor = isEntrada ? 'var(--success)' : 'var(--danger)'; 
+                let classRow = isEntrada ? 'row-in' : 'row-out';
                 let dataBr = l[0] ? l[0].split('-').reverse().join('/') : '';
+                
+                totalHist += isEntrada ? v : -v;
+
                 corpo.innerHTML += `
-                <tr>
+                <tr class="${classRow}">
                     <td>${dataBr}</td>
-                    <td><strong>${l[3]}</strong><br><small style="color:#777;">${l[2]}</small></td>
-                    <td style="font-weight:bold; color:${cor};">${fmt(l[4])}</td>
-                    <td align="center">
-                        <button onclick="excluirFinanceiro('${l[6]}', '${l[3]}')" style="background:none;border:none;color:var(--danger-text);cursor:pointer;font-size:1.1rem;">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                    <td><strong>${l[1]}</strong></td>
+                    <td>${l[2]}</td>
+                    <td>${l[3]}</td>
+                    <td style="font-weight:bold; color:${cor};">${fmt(v)} 
+                        <button onclick="excluirFinanceiro('${l[6]}', '${l[3]}')" class="btn-icon" style="background:transparent; color:var(--danger); padding:0; margin-left:10px; font-size:1rem;" title="Excluir"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>`; 
             }
         }); 
 
-        // Pinta os valores nos Cards lá de cima
-        const saldo = ent - sai;
-        
-        // Procura os cards usando classes ou IDs
-        const cardSaldo = document.getElementById('finSaldo') || document.getElementById('valSaldo');
-        const cardEntrada = document.getElementById('finEntrada') || document.getElementById('valEntradas');
-        const cardSaida = document.getElementById('finSaida') || document.getElementById('valSaidas');
-
-        if(cardSaldo) cardSaldo.innerText = fmt(saldo); 
-        if(cardEntrada) cardEntrada.innerText = fmt(ent); 
-        if(cardSaida) cardSaida.innerText = fmt(sai); 
+        // Atualiza os Cards
+        document.getElementById('kpiSaldo').innerText = fmt(ent - sai); 
+        document.getElementById('kpiEntradas').innerText = fmt(ent); 
+        document.getElementById('kpiSaidas').innerText = fmt(sai); 
+        document.getElementById('kpiDizimos').innerText = fmt(dizimos); 
+        document.getElementById('kpiOfertas').innerText = fmt(ofertas); 
+        document.getElementById('footerTotal').innerText = fmt(totalHist);
     }
 
     // ==========================================
-    // REGRAS DO FORMULÁRIO (DÍZIMO E OFERTA)
+    // GRÁFICOS (CHART.JS)
+    // ==========================================
+    function atualizarGrafico() {
+        const ctx = document.getElementById('financeChart');
+        if(!ctx) return;
+
+        // Pega os últimos 6 meses (simplificado para o gráfico)
+        const meses = []; const entData = []; const saiData = [];
+        const hoje = new Date();
+        
+        for (let i = 5; i >= 0; i--) {
+            let d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+            meses.push(d.toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
+            
+            let prefixoData = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}`;
+            let entMes = 0, saiMes = 0;
+            
+            dadosFinanceiros.forEach(f => {
+                if(f[0].startsWith(prefixoData)) {
+                    if(f[1] === 'Entrada') entMes += parseFloat(f[4]);
+                    else saiMes += parseFloat(f[4]);
+                }
+            });
+            entData.push(entMes);
+            saiData.push(saiMes);
+        }
+
+        if (meuGrafico) meuGrafico.destroy();
+        meuGrafico = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: meses,
+                datasets: [
+                    { label: 'Entradas', data: entData, backgroundColor: '#1e8e3e', borderRadius: 4 },
+                    { label: 'Saídas', data: saiData, backgroundColor: '#c5221f', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // ==========================================
+    // REGRAS DO FORMULÁRIO E SMART SEARCH
     // ==========================================
     function atualizarCategorias() { 
-        const t = document.getElementById('finTipo') || document.querySelector('[name="tipo"]'); 
-        const c = document.getElementById('finCategoria') || document.querySelector('[name="categoria"]'); 
-        if(c && t) {
-            c.innerHTML = t.value === 'Saída' 
-                ? '<option value="Despesa Fixa">Despesa Fixa</option><option value="Eventual">Eventual</option><option value="Manutenção">Manutenção</option>' 
-                : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>'; 
-            atualizarCampos(); 
-        }
+        const t = document.getElementById('finTipo').value; 
+        const c = document.getElementById('finCategoria'); 
+        c.innerHTML = t === 'Saída' 
+            ? '<option value="Despesa Fixa">Despesa Fixa</option><option value="Eventual">Eventual</option><option value="Manutenção">Manutenção</option>' 
+            : '<option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option>'; 
+        atualizarCampos(); 
     }
     
     function atualizarCampos() { 
-        const t = document.getElementById('finTipo') || document.querySelector('[name="tipo"]');
-        const c = document.getElementById('finCategoria') || document.querySelector('[name="categoria"]');
-        const d = document.getElementById('finDescricaoInput') || document.querySelector('[name="descricao"]'); 
-        // Se houver um select de membro:
-        const m = document.getElementById('finMembroSelect') || document.querySelector('[name="membro"]');
+        const t = document.getElementById('finTipo').value;
+        const c = document.getElementById('finCategoria').value;
+        const boxMem = document.getElementById('boxMembro');
+        const boxDesc = document.getElementById('boxDescricao'); 
         
-        if(t && c && t.value === 'Entrada' && c.value === 'Dízimo') { 
-            if(m) m.style.display = 'block'; 
-            if(d) d.style.display = 'none'; 
+        if(t === 'Entrada' && c === 'Dízimo') { 
+            boxMem.classList.remove('hidden'); 
+            boxDesc.classList.add('hidden'); 
         } else { 
-            if(m) m.style.display = 'none'; 
-            if(d) d.style.display = 'block'; 
+            boxMem.classList.add('hidden'); 
+            boxDesc.classList.remove('hidden'); 
         } 
     }
 
-    function preencherSelects(lista) {
-        const s = document.getElementById('finMembroSelect') || document.querySelector('[name="membro"]'); 
-        if(!s) return;
-        s.innerHTML = '<option value="">Selecione o Membro...</option>'; 
-        let nomes = lista.map(i => i[1]).sort((a,b)=>a.localeCompare(b));
-        nomes.forEach(n => s.innerHTML += `<option value="${n}">${n}</option>`); 
+    function filtrarDropdownMembros() {
+        const input = document.getElementById('inputBuscaMembro');
+        const filter = input.value.toLowerCase();
+        const dropdown = document.getElementById('dropdownMembros');
+        const icon = document.getElementById('iconValidMember');
+        
+        dropdown.innerHTML = '';
+        icon.style.display = 'none';
+        input.classList.remove('valid-member');
+
+        if (!filter) { dropdown.style.display = 'none'; return; }
+
+        let matches = dadosMembros.filter(m => m[1].toLowerCase().includes(filter));
+        
+        if (matches.length > 0) {
+            dropdown.style.display = 'block';
+            matches.slice(0, 10).forEach(m => {
+                let div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerText = m[1];
+                div.onclick = function() {
+                    input.value = m[1];
+                    dropdown.style.display = 'none';
+                    input.classList.add('valid-member');
+                    icon.style.display = 'block';
+                };
+                dropdown.appendChild(div);
+            });
+        } else {
+            dropdown.style.display = 'none';
+        }
     }
+    // Esconde o dropdown se clicar fora
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) {
+            document.getElementById('dropdownMembros').style.display = 'none';
+        }
+    });
 
     // ==========================================
-    // RENDERIZAR TABELA DIZIMISTAS
+    // DIZIMISTAS E MODAL
     // ==========================================
-    function renderizarDizimistas(lista) {
+    function renderizarDizimistas() {
         const corpo = document.getElementById('tbDizimistas');
         if(!corpo) return;
         corpo.innerHTML = '';
         
-        lista.forEach(m => {
+        dadosMembros.forEach(m => {
             let isDizimista = (m[9] === 'Sim' || m[9] === 'sim');
-            let badge = isDizimista ? `<span style="background:var(--success-bg);color:var(--success-text);padding:3px 6px;border-radius:4px;font-size:0.7rem;font-weight:bold;">Dizimista Ativo</span>` : `<span style="background:#eee;color:#888;padding:3px 6px;border-radius:4px;font-size:0.7rem;">Não Dizimista</span>`;
+            let badge = isDizimista ? `<span style="background:var(--success-light);color:var(--success);padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:bold;">Ativo</span>` : `<span style="background:#eee;color:#888;padding:3px 8px;border-radius:6px;font-size:0.75rem;">Inativo</span>`;
             
+            // Busca a data do último dízimo
+            let ultimoDizimo = 'Nenhum registro';
+            let dFiltro = dadosFinanceiros.filter(f => f[1] === 'Entrada' && f[2] === 'Dízimo' && f[3] === m[1]);
+            if(dFiltro.length > 0) {
+                let ut = dFiltro[0]; // Como já vem ordenado por data, o índice 0 é o mais recente
+                ultimoDizimo = `${ut[0].split('-').reverse().join('/')} - R$ ${ut[4]}`;
+            }
+
             corpo.innerHTML += `
             <tr data-nome="${m[1].toLowerCase()}">
                 <td><strong>${m[1]}</strong><br>${badge}</td>
-                <td>${m[3] || 'Sem Célula'}</td>
+                <td>${ultimoDizimo}</td>
                 <td align="center">
-                    <button onclick="alert('Função de editar no painel Pastoral')" style="background:#f0f4f8;border:1px solid #cce5ff;color:#0056b3;padding:5px 10px;border-radius:5px;cursor:pointer;">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    <button onclick="abrirDizimista('${m[1]}')" class="btn-icon" title="Ver Histórico"><i class="fas fa-eye"></i></button>
                 </td>
             </tr>`;
         });
@@ -495,49 +600,99 @@
         }
     }
 
-    function filtrarHistorico() { 
-        let t = document.getElementById('buscaHist').value.toLowerCase(); 
-        let trs = document.getElementById('tbHistorico').getElementsByTagName('tr'); 
-        for(let tr of trs) {
-            tr.style.display = tr.innerText.toLowerCase().includes(t) ? '' : 'none'; 
+    function abrirDizimista(nome) {
+        document.getElementById('modalNomeDizimista').innerText = nome;
+        document.getElementById('modalAnoDizimista').innerText = new Date().getFullYear();
+        document.getElementById('modalVisualDizimista').classList.remove('hidden');
+        // A lógica de preencher os bloquinhos do mês pode ser adicionada aqui
+    }
+
+    function fecharModalVisual(e) {
+        if(e === null || e.target.id === 'modalVisualDizimista') {
+            document.getElementById('modalVisualDizimista').classList.add('hidden');
         }
     }
 
     // ==========================================
     // SALVAR LANÇAMENTO FINANCEIRO
     // ==========================================
-    const formFin = document.getElementById('formLancamento') || document.getElementById('formFinanceiro');
-    if (formFin) {
-        formFin.onsubmit = async function(e) {
-            e.preventDefault();
-            const btn = this.querySelector('button[type="submit"]'); 
-            if(btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
+    document.getElementById('formFinanceiro').onsubmit = async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSalvarFin'); 
+        btn.disabled = true; btn.innerText = "Salvando...";
 
-            let tipoVal = this.tipo ? this.tipo.value : '';
-            let catVal = this.categoria ? this.categoria.value : '';
+        let tipoVal = document.getElementById('finTipo').value;
+        let catVal = document.getElementById('finCategoria').value;
+        
+        let desc = (tipoVal === 'Entrada' && catVal === 'Dízimo') 
+            ? document.getElementById('inputBuscaMembro').value 
+            : document.getElementById('finDescricaoInput').value; 
+        
+        if(!desc) { alert("Preencha a descrição ou selecione um membro."); btn.disabled = false; btn.innerText = "Confirmar"; return; }
+
+        const dados = {
+            tipo: tipoVal,
+            categoria: catVal,
+            descricao: desc,
+            valor: parseFloat(document.getElementById('finValor').value.replace(',', '.')),
+            data: document.getElementById('finData').value,
+            metodo: this.metodo.value
+        };
+
+        try {
+            await supabaseClient.from('financeiro').insert([dados]);
+            registrarLogAcao(`Lançou ${dados.tipo} (${dados.categoria}): ${dados.descricao} - R$ ${dados.valor}`);
+            alert("Lançamento salvo com sucesso!");
             
-            let desc = (tipoVal === 'Entrada' && catVal === 'Dízimo' && this.membro) ? this.membro.value : this.descricao.value; 
+            // Limpa o form
+            this.reset();
+            document.getElementById('finData').valueAsDate = new Date();
+            document.getElementById('inputBuscaMembro').value = '';
+            document.getElementById('inputBuscaMembro').classList.remove('valid-member');
+            document.getElementById('iconValidMember').style.display = 'none';
+            atualizarCategorias();
+            
+            carregarTudo(); 
+        } catch(error) {
+            console.error(error);
+            alert("Erro ao salvar lançamento.");
+        } finally {
+            btn.disabled = false; btn.innerText = "Confirmar";
+        }
+    };
+
+    // ==========================================
+    // SALVAR NOVO MEMBRO (VIA MODAL TESOURARIA)
+    // ==========================================
+    const formMembro = document.getElementById('formMembroCompleto');
+    if (formMembro) {
+        formMembro.onsubmit = async function(e) { 
+            e.preventDefault(); 
+            const btn = document.getElementById('btnSalvarMembro'); 
+            btn.innerText = "Salvando..."; btn.disabled = true;
             
             const dados = {
-                tipo: tipoVal,
-                categoria: catVal,
-                descricao: desc,
-                valor: parseFloat(this.valor.value.replace(',', '.')),
-                data: this.data.value,
-                metodo: this.metodo ? this.metodo.value : 'Indefinido'
-            };
+                nome: this.nome.value, 
+                nascimento: this.nascimento.value || null, 
+                telefone: this.telefone.value, 
+                celula: this.celula.value, 
+                categoria: this.categoria.value, 
+                batizado: this.batizado.checked ? "Sim" : "Não", 
+                dizimista: this.dizimista.checked ? "Sim" : "Não", 
+                cursao: "Não", ctl: "Não", encontro: "Não", arquivado: "Não"
+            }; 
 
-            try {
-                await supabaseClient.from('financeiro').insert([dados]);
-                registrarLogAcao(`Lançou ${dados.tipo} (${dados.categoria}): ${dados.descricao} - R$ ${dados.valor}`);
-                alert("Lançamento salvo com sucesso!");
+            try { 
+                await supabaseClient.from('membros').insert([dados]);
+                registrarLogAcao(`Cadastrou novo membro via Tesouraria: ${dados.nome}`);
+                alert("Membro salvo com sucesso!"); 
                 this.reset();
-                carregarTudo(); 
-            } catch(error) {
-                console.error(error);
-                alert("Erro ao salvar lançamento.");
+                document.getElementById('modalMembro').classList.add('hidden');
+                carregarTudo();
+            } catch(err) {
+                console.error(err); alert("Erro ao salvar membro.");
             } finally {
-                if(btn) { btn.disabled = false; btn.innerText = "Registrar Movimentação"; }
+                btn.innerText = "Salvar"; btn.disabled = false;
             }
         };
     }
@@ -556,8 +711,40 @@
     }
 
     // ==========================================
-    // REGISTRO DE LOGS (AUDITORIA)
+    // UTILITÁRIOS (Ordenação e Logs)
     // ==========================================
+    function filtrarHistorico() { 
+        let t = document.getElementById('buscaHist').value.toLowerCase(); 
+        let trs = document.getElementById('tbHistorico').getElementsByTagName('tr'); 
+        for(let tr of trs) {
+            tr.style.display = tr.innerText.toLowerCase().includes(t) ? '' : 'none'; 
+        }
+    }
+
+    let asc = true;
+    function ordenarTabela(colIndex, tipo) {
+        const tabela = document.getElementById("tabelaHistoricoMain");
+        const tbody = document.getElementById("tbHistorico");
+        const linhas = Array.from(tbody.querySelectorAll("tr"));
+        
+        linhas.sort((a, b) => {
+            let valA = a.children[colIndex].innerText;
+            let valB = b.children[colIndex].innerText;
+            
+            if (tipo === 'data') {
+                valA = valA.split('/').reverse().join('');
+                valB = valB.split('/').reverse().join('');
+            } else if (tipo === 'valor') {
+                valA = parseFloat(valA.replace('R$', '').replace('.', '').replace(',', '.').trim());
+                valB = parseFloat(valB.replace('R$', '').replace('.', '').replace(',', '.').trim());
+            }
+            return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
+        });
+        
+        asc = !asc;
+        tbody.append(...linhas);
+    }
+
     async function registrarLogAcao(acaoRealizada) {
         const nomeReal = sessionStorage.getItem('usuarioLogado') || 'Desconhecido';
         const user = sessionStorage.getItem('loginDigitado') || 'Desconhecido';
@@ -565,10 +752,7 @@
         
         try {
             await supabaseClient.from('log').insert([{ 
-                datahora: dataHoraAtual, 
-                usuario: user, 
-                nomelider: nomeReal, 
-                acao: acaoRealizada 
+                datahora: dataHoraAtual, usuario: user, nomelider: nomeReal, acao: acaoRealizada 
             }]);
         } catch (e) { console.error("Erro ao salvar o log:", e); }
     }
