@@ -302,7 +302,7 @@
 
 
    
-    <script>
+   <script>
     // ==========================================
     // CONFIGURAÇÃO SUPABASE
     // ==========================================
@@ -312,6 +312,7 @@
 
     let dadosFinanceiros = [];
     let dadosMembros = [];
+    let dadosCelulas = []; // <-- NOVA VARIÁVEL PARA AS CÉLULAS
     let meuGrafico = null; 
 
     // ==========================================
@@ -356,9 +357,11 @@
         if(icon) icon.classList.add('fa-spin');
 
         try {
-            const [ { data: finData }, { data: memData } ] = await Promise.all([
+            // AGORA ELE BUSCA O FINANCEIRO, MEMBROS E TAMBÉM AS CÉLULAS!
+            const [ { data: finData }, { data: memData }, { data: celData } ] = await Promise.all([
                 supabaseClient.from('financeiro').select('*').order('data', { ascending: false }),
-                supabaseClient.from('membros').select('*').order('nome', { ascending: true })
+                supabaseClient.from('membros').select('*').order('nome', { ascending: true }),
+                supabaseClient.from('celulas').select('*').order('nome', { ascending: true })
             ]);
 
             dadosFinanceiros = finData ? finData.map(f => [
@@ -369,9 +372,12 @@
                 m.id, m.nome || 'Sem Nome', m.tipo || 'Membro', m.celula || '', m.telefone || '', '', m.batizado || 'Não', m.cursao || 'Não', m.ctl || 'Não', m.dizimista || 'Não', m.nascimento || ''
             ]) : [];
 
+            dadosCelulas = celData || []; // Armazena as células
+
             renderizarFinanceiro();
             renderizarDizimistas();
             atualizarGrafico();
+            preencherSelectCelulas(); // <-- Preenche o Dropdown do novo membro
 
         } catch(e) {
             console.error("Erro ao carregar:", e);
@@ -545,7 +551,7 @@
     });
 
     // ==========================================
-    // TABELA DIZIMISTAS E MODAL (EXATAMENTE COMO NO PRINT)
+    // TABELA DIZIMISTAS E MODAL 
     // ==========================================
     function renderizarDizimistas() {
         const corpo = document.getElementById('tbDizimistas');
@@ -554,17 +560,15 @@
         
         const fmt = (v) => parseFloat(v).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
         
-        // Pega quem está marcado como dizimista OU já deu dízimo
         const nomesQueDizimaram = new Set(dadosFinanceiros.filter(f => f[2] === 'Dízimo').map(f => f[3]));
         let listaFiltrada = dadosMembros.filter(m => (m[9] === 'Sim' || m[9] === 'sim') || nomesQueDizimaram.has(m[1]));
 
         listaFiltrada.forEach(m => {
             let ultimoDizimo = '';
             
-            // Busca o último dízimo da pessoa
             let dFiltro = dadosFinanceiros.filter(f => f[1] === 'Entrada' && f[2] === 'Dízimo' && f[3] === m[1]);
             if(dFiltro.length > 0) {
-                let ut = dFiltro[0]; // Como já vem ordenado pela data decrescente, o index 0 é o mais recente
+                let ut = dFiltro[0]; 
                 ultimoDizimo = `${ut[0].split('-').reverse().join('/')} - ${fmt(ut[4])}`;
             }
 
@@ -590,14 +594,12 @@
         }
     }
 
-    // Cartela do Histórico (Modal)
     function abrirDizimista(nome) {
         document.getElementById('modalNomeDizimista').innerText = nome;
         
         const anoFiltro = document.getElementById('filtroAno').value || new Date().getFullYear();
         document.getElementById('modalAnoDizimista').innerText = anoFiltro;
         
-        // Filtra dízimos da pessoa NO ANO selecionado
         let dFiltro = dadosFinanceiros.filter(f => 
             f[1] === 'Entrada' && 
             f[2] === 'Dízimo' && 
@@ -611,7 +613,7 @@
         dFiltro.forEach(f => {
             let valor = parseFloat(f[4]);
             totalAno += valor;
-            let mesIndex = parseInt(f[0].split('-')[1]) - 1; // Transforma o mês 01-12 para index 0-11
+            let mesIndex = parseInt(f[0].split('-')[1]) - 1; 
             mesesValor[mesIndex] += valor;
         });
 
@@ -637,6 +639,19 @@
         if(e === null || e.target.id === 'modalVisualDizimista') {
             document.getElementById('modalVisualDizimista').classList.add('hidden');
         }
+    }
+
+    // ==========================================
+    // PREENCHER CÉLULAS NO MODAL DE NOVO MEMBRO
+    // ==========================================
+    function preencherSelectCelulas() {
+        const select = document.getElementById('modalSelectCelula');
+        if(!select) return;
+        
+        select.innerHTML = '<option value="">Selecione...</option>';
+        dadosCelulas.forEach(c => {
+            select.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
+        });
     }
 
     // ==========================================
@@ -701,7 +716,7 @@
                 nascimento: this.nascimento.value || null, 
                 telefone: this.telefone.value, 
                 celula: this.celula.value, 
-                categoria: this.categoria.value, 
+                tipo: this.categoria.value, // <-- Corrigido de 'categoria' para 'tipo'
                 batizado: this.batizado.checked ? "Sim" : "Não", 
                 dizimista: this.dizimista.checked ? "Sim" : "Não", 
                 cursao: "Não", ctl: "Não", encontro: "Não", arquivado: "Não"
