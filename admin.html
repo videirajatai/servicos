@@ -231,7 +231,10 @@
          const u = dadosUsuarios[index];
          document.getElementById('usuarioOriginal').value = u.id; // Guarda o ID do Supabase
          document.getElementById('cadUsuario').value = u.usuario;
-         document.getElementById('cadUsuario').readOnly = true; // Impede mudar o login na edição
+         
+         // AQUI ESTÁ A MUDANÇA: readOnly = false para permitir a edição
+         document.getElementById('cadUsuario').readOnly = false; 
+         
          document.getElementById('cadSenha').value = u.senha;
          document.getElementById('cadNome').value = u.nome;
          document.getElementById('cadCategoria').value = u.categoria;
